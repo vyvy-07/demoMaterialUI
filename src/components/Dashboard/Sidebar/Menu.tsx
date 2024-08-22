@@ -142,9 +142,9 @@ export default function NestedList() {
     <Box sx={{ minHeight: 352, minWidth: 250 }}>
       <SimpleTreeView>
         {menu.map((item: TMenu) => (
-          <>
+          <div key={item?.id}>
             {item?.subCates ? (
-              <TreeItem itemId={item?.id} key={item?.id} label={item?.name}>
+              <TreeItem itemId={item?.id} label={item?.name}>
                 {item?.subCates?.map((subMenu: TMenu) => (
                   <Link href={subMenu?.alias} key={subMenu?.id}>
                     <TreeItem itemId={subMenu?.id} label={subMenu?.name} />
@@ -152,11 +152,11 @@ export default function NestedList() {
                 ))}
               </TreeItem>
             ) : (
-              <Link href={item?.alias} key={item?.id}>
+              <Link href={item?.alias}>
                 <TreeItem itemId={item?.id} label={item?.name} />
               </Link>
             )}
-          </>
+          </div>
         ))}
       </SimpleTreeView>
     </Box>
