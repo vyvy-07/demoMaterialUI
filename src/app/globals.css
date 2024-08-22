@@ -18,16 +18,6 @@
 
 body {
 }
-.MuiTreeItem-iconContainer {
-  display: none !important;
-}
-.MuiTreeItem-label {
-  display: flex;
-  gap: 8px;
-}
-.justify-content {
-  @apply justify-end;
-}
 
 @layer utilities {
   .text-balance {

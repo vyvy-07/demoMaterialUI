@@ -1,9 +1,8 @@
+import SidebarCollab from '@/components/Dashboard/Sidebar';
+import { ThemeModeProvider } from '@/components/ThemeContext';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
-import { ThemeModeProvider } from '@/components/ThemeContext';
-import Header from '@/components/Header';
-import Sidebar from '@/components/Dashboard/Sidebar';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -21,11 +20,10 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <ThemeModeProvider>
-          <Header />
-          <div className="flex">
-            <Sidebar />
+          <SidebarCollab>
+            {/* <Header /> */}
             {children}
-          </div>
+          </SidebarCollab>
         </ThemeModeProvider>
       </body>
     </html>
