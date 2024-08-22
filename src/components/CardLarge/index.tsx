@@ -1,36 +1,34 @@
-import { Button, Card, CardActions, CardContent } from '@mui/material';
+import {
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  CardMedia,
+} from '@mui/material';
 import Typography from '@mui/material/Typography';
 
 export const CardLarge = () => {
   return (
-    <Card
-      sx={{
-        minWidth: 275,
-        backgroundColor: 'transperent',
-        position: 'relative',
-      }}
-    >
-      <div className="absolute w-full h-full ">
-        <img
-          className="absolute w-full h-full -z-10"
-          src="./banner.jpg"
-          alt="banner"
-        />
-      </div>
+    <Card>
+      <CardMedia
+        sx={{
+          minHeight: 150,
+          height: '100%',
+        }}
+        image="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+        title="green iguana"
+      />
       <CardContent>
-        <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-          Word of the Day
+        <Typography gutterBottom variant="h5" component="div">
+          Lizard
         </Typography>
-        <Typography variant="h5" component="div"></Typography>
-        <Typography sx={{ mb: 1.5 }} color="text.secondary">
-          adjective
-        </Typography>
-        <Typography variant="body2">
-          well meaning and kindly.
-          <br />a benevolent smile
+        <Typography variant="body2" color="text.secondary">
+          Lizards are a widespread group of squamate reptiles, with over 6,000
+          species, ranging across all continents except Antarctica
         </Typography>
       </CardContent>
       <CardActions>
+        <Button size="small">Share</Button>
         <Button size="small">Learn More</Button>
       </CardActions>
     </Card>

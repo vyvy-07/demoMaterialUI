@@ -1,6 +1,7 @@
 'use client';
 import CardLarge from '@/components/CardLarge';
 import SimpleBarChart from '@/components/Chart';
+import BasicPie from '@/components/PieChart';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
@@ -29,8 +30,7 @@ export default function Dashboard() {
         </Grid>
         <Grid item xs={6} md={4}>
           <Item>
-            {' '}
-            <CardLarge />
+            <BasicPie />
           </Item>
         </Grid>
         <Grid item xs={6} md={8}>
