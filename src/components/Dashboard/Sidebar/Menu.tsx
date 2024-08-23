@@ -1,6 +1,8 @@
 'use client';
 import Menu from '@/DataFake/menu';
 import {
+  Box,
+  Button,
   List,
   ListItem,
   ListItemButton,
@@ -19,18 +21,16 @@ interface TMenu {
   parentId?: string | undefined;
   subCates?: TMenu[];
 }
-interface Label {
-  icon: any;
-  label: string | undefined;
+interface NestedListProps {
+  isShow: string;
+  handleShowSubCate: (id: string) => void;
 }
-
-export default function NestedList() {
+export default function NestedList({
+  isShow,
+  handleShowSubCate,
+}: NestedListProps) {
   const [open, setOpen] = React.useState(true);
-  const [isShow, setIsShow] = React.useState('');
 
-  const handleShowSubCate = (id: string) => {
-    setIsShow(id);
-  };
   const listNav = Menu || [];
   return (
     <>
@@ -38,7 +38,12 @@ export default function NestedList() {
         {listNav?.length > 0 &&
           listNav?.map((item: TMenu, index) => (
             <ListItem key={item?.id} disablePadding sx={{ display: 'block' }}>
-              <ListItemButton onClick={() => handleShowSubCate(item?.id)}>
+              <ListItemButton
+                className={`${
+                  item?.subCates && open == false && 'pointer-events-none'
+                }`}
+                onClick={() => handleShowSubCate(item?.id)}
+              >
                 <Link href={item?.alias}></Link>
                 <ListItemIcon
                   sx={{
@@ -69,7 +74,7 @@ export default function NestedList() {
                       <Link
                         href={subCate?.alias}
                         key={subCate?.id}
-                        className="flex items-center p-3 max-w-[200px] whitespace-wrap"
+                        className={`flex items-center p-3 max-w-[200px] whitespace-wrap `}
                       >
                         {subIndex % 2 === 0 ? <InboxIcon /> : <MailIcon />}
                         <p className="block ml-3"> {subCate?.name}</p>

@@ -20,10 +20,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <ThemeModeProvider>
-          <SidebarCollab>
-            {/* <Header /> */}
-            {children}
-          </SidebarCollab>
+          <SidebarCollab>{children}</SidebarCollab>
         </ThemeModeProvider>
       </body>
     </html>

@@ -2,9 +2,15 @@
 
 import { createAppTheme } from '@/theme';
 import { CssBaseline, ThemeProvider } from '@mui/material';
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 
-type Mode = 'light' | 'dark' | 'system';
+type Mode = 'light' | 'dark' | '';
 
 // Interface for the context value
 interface ThemeContextProps {
@@ -22,41 +28,23 @@ export const useThemeMode = (): ThemeContextProps => {
   }
   return context;
 };
-const isMode = (value: any): value is Mode => {
-  return value === 'light' || value === 'dark' || value === 'system';
-};
 export const ThemeModeProvider = ({
   children,
 }: {
   children: React.ReactNode;
 }) => {
-  const [mode, setMode] = useState<Mode>(() => {
-    if (typeof window !== 'undefined') {
-      // Check if running in a browser
-      const savedMode = localStorage.getItem('themeMode');
-      if (isMode(savedMode)) {
-        return savedMode;
-      }
-    }
-    return 'system'; // Default to 'system' if no valid mode is found or not in a browser environment
-  });
-
+  const [mode, setMode] = useState<Mode>('light');
+  const toggleMode = (selectedMode: Mode) => {
+    setMode(selectedMode);
+    localStorage.setItem('themeMode', selectedMode);
+  };
+  const theme = createAppTheme(mode);
   useEffect(() => {
-    localStorage.setItem('themeMode', mode);
-  }, [mode]);
-
-  const theme = useMemo(() => {
-    const currentMode =
-      mode === 'system'
-        ? typeof window !== 'undefined' &&
-          window.matchMedia('prefers-color-scheme: dark').matches
-          ? 'dark'
-          : 'light'
-        : mode;
-    return createAppTheme(currentMode);
-  }, [mode]);
-
-  const toggleMode = (selectedMode: Mode) => setMode(selectedMode);
+    const modeCurrent = localStorage?.getItem('themeMode') as Mode;
+    if (modeCurrent) {
+      setMode(modeCurrent);
+    }
+  }, []);
 
   return (
     <ThemeContext.Provider value={{ mode, toggleMode }}>

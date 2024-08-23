@@ -1,16 +1,20 @@
 import { createTheme } from '@mui/material/styles';
+import { light } from '@mui/material/styles/createPalette';
 // primary: xám
 // secondary:
+
 export const tokenColors = (mode) => ({
   ...(mode === 'dark'
     ? {
         primary: {
           100: '#eff7fa',
           500: '#add8e6',
+          900: '#68828a',
         },
         secondary: {
-          100: '#cdeefd',
-          500: '#04abf3',
+          100: '#f5fcff',
+          500: '#cdeefd',
+          900: '#293033',
         },
         grey: {
           100: '#f6f6f6',
@@ -18,17 +22,19 @@ export const tokenColors = (mode) => ({
         },
         black: {
           100: '#fefefe',
-          500: '#000000',
+          500: '#1C252E',
         },
       }
     : {
         primary: {
           100: '#eff7fa',
           500: '#add8e6',
+          900: '#68828a',
         },
         secondary: {
-          100: '#cdeefd',
-          500: '#04abf3',
+          100: '#f5fcff',
+          500: '#cdeefd',
+          900: '#293033',
         },
         grey: {
           100: '#f6f6f6',
@@ -48,12 +54,18 @@ export const getDesignTokens = (mode) => {
       mode,
       primary: {
         main: colors.primary[500],
+        light: colors.primary[100],
+        dark: colors.primary[900],
       },
       secondary: {
         main: colors.secondary[500],
+        light: colors.secondary[100],
+        dark: colors.secondary[900],
       },
       black: {
         main: colors.black[500],
+        light: colors.black[100],
+        dark: colors.black[900],
       },
       grey: {
         main: colors.grey[100],

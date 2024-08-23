@@ -38,6 +38,12 @@ export default function Dashboard() {
             <SimpleBarChart />
           </Item>
         </Grid>
+        <Grid xs={6} md={8}>
+          <Item></Item>
+        </Grid>
+        <Grid xs={6} md={4}>
+          <Item>xs=6 md=4</Item>
+        </Grid>
       </Grid>
     </Box>
   );

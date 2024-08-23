@@ -9,7 +9,6 @@ import './style.css';
 
 import { Badge, Box, Button, IconButton, Typography } from '@mui/material';
 import * as React from 'react';
-
 import { useThemeMode } from '@/components/ThemeContext';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 
@@ -92,6 +91,7 @@ const SidebarCollab = ({ children }: { children: React.ReactNode }) => {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
   const { mode, toggleMode } = useThemeMode();
+  const [isShow, setIsShow] = React.useState('');
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -99,7 +99,13 @@ const SidebarCollab = ({ children }: { children: React.ReactNode }) => {
 
   const handleDrawerClose = () => {
     setOpen(false);
+    setIsShow('');
   };
+
+  const handleShowSubCate = (id: string) => {
+    return setIsShow(id);
+  };
+  console.log('isShow :>> ', isShow);
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -130,17 +136,13 @@ const SidebarCollab = ({ children }: { children: React.ReactNode }) => {
               </IconButton>
               <Badge>
                 {mode === 'dark' ? (
-                  <Button onClick={() => toggleMode('system')}>
+                  <Button onClick={() => toggleMode('light')}>
                     <DarkModeIcon color="primary" />
                   </Button>
                 ) : (
-                  (mode === 'light' && (
+                  mode === 'light' && (
                     <Button onClick={() => toggleMode('dark')}>
                       <LightModeIcon color="success" />
-                    </Button>
-                  )) || (
-                    <Button onClick={() => toggleMode('light')}>
-                      <AutoModeIcon color="success" />
                     </Button>
                   )
                 )}
@@ -161,7 +163,7 @@ const SidebarCollab = ({ children }: { children: React.ReactNode }) => {
         </DrawerHeader>
         <Divider />
         <Divider />
-        <NestedList />
+        <NestedList isShow={isShow} handleShowSubCate={handleShowSubCate} />
       </Drawer>
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <DrawerHeader />
