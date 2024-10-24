@@ -7,6 +7,13 @@ const Menu = [
     parentId: '',
   },
   {
+    id: '6018dbf03b03d94d64345ecd',
+    name: 'Soạn thảo',
+    alias: 'editArticle',
+    isDisplayOnMenu: true,
+    parentId: '',
+  },
+  {
     id: '6268ab6b9270666ac1a9ba39',
     name: 'Media',
     alias: 'media',
@@ -30,14 +37,7 @@ const Menu = [
           },
         ],
       },
-      {
-        id: '6018dbf03b03d94d646aeecd',
-        name: 'Emagazine',
-        alias: 'emagazine',
-        isDisplayOnMenu: true,
-        parentId: '6268ab6b9270666ac1a9ba39',
-        subCates: [],
-      },
+
       {
         id: '621ee24fb39100710b1a214a',
         name: 'Podcast',
