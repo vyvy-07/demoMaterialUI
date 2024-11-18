@@ -3,6 +3,8 @@ import { ThemeModeProvider } from '@/components/ThemeContext';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
+import ModelProvider from '@/components/ModelContext';
+// import 'ckeditor5-premium-features/ckeditor5-premium-features.css';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -20,7 +22,9 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <ThemeModeProvider>
-          <SidebarCollab>{children}</SidebarCollab>
+          <SidebarCollab>
+            <ModelProvider>{children}</ModelProvider>
+          </SidebarCollab>
         </ThemeModeProvider>
       </body>
     </html>

@@ -14,6 +14,13 @@ const Menu = [
     parentId: '',
   },
   {
+    id: '6018dbf03b03444d64345ecd',
+    name: 'ckeditor',
+    alias: 'ckeditor',
+    isDisplayOnMenu: true,
+    parentId: '',
+  },
+  {
     id: '6268ab6b9270666ac1a9ba39',
     name: 'Media',
     alias: 'media',
