@@ -411,7 +411,7 @@ function CustomEditor() {
     <>
       <PopUpModel editor={editorRef.current} />
       <div className="grid grid-cols-2 gap-6">
-        <div className="ckeditor">
+        <div className="ckeditor ">
           <CKEditor
             editor={ClassicEditor}
             config={{
