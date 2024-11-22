@@ -95,7 +95,28 @@ class ScreenPlugin extends Plugin {
     });
   }
 }
-
+class CreateDiv extends Plugin {
+  static get requires() {
+    // ADDED
+    return [Widget];
+  }
+  init() {
+    const editor = this.editor;
+    editor.ui.componentFactory.add('createDiv', () => {
+      const button = new ButtonView();
+      const ckeditor: any = document?.querySelector('.ck-content ');
+      const text = document?.querySelectorAll('p');
+      button.set({
+        label: 'createDiv',
+        icon: FullScreenIcon,
+      });
+      button.on('execute', () => {
+        console.log('text :>> ', text);
+      });
+      return button;
+    });
+  }
+}
 class UploadMedia extends Plugin {
   static get requires() {
     // ADDED
@@ -416,6 +437,7 @@ function CustomEditor() {
             editor={ClassicEditor}
             config={{
               plugins: [
+                CreateDiv,
                 InsertGrid,
                 UploadMedia,
                 Grid9x3,
@@ -474,6 +496,7 @@ function CustomEditor() {
               ],
               toolbar: {
                 items: [
+                  'createDiv',
                   'uploadMedia',
                   'grid',
 
@@ -528,18 +551,23 @@ function CustomEditor() {
                   '|',
 
                   'findAndReplace',
-
-                  {
-                    label: 'More basic styles',
-                    icon: 'threeVerticalDots',
-                    items: [
-                      'horizontalLine',
-                      'pageBreak',
-                      'codeBlock',
-                      'sourceEditing',
-                      'highlight',
-                    ],
-                  },
+                  '|',
+                  'horizontalLine',
+                  'pageBreak',
+                  'codeBlock',
+                  'sourceEditing',
+                  'highlight',
+                  // {
+                  //   label: 'More basic styles',
+                  //   icon: 'threeVerticalDots',
+                  //   items: [
+                  //     'horizontalLine',
+                  //     'pageBreak',
+                  //     'codeBlock',
+                  //     'sourceEditing',
+                  //     'highlight',
+                  //   ],
+                  // },
                 ],
                 shouldNotGroupWhenFull: true,
               },
@@ -547,8 +575,8 @@ function CustomEditor() {
               image: {
                 styles: {},
                 toolbar: [
-                  'toggleImageCaption',
-                  'imageTextAlternative',
+                  // 'toggleImageCaption',
+                  // 'imageTextAlternative',
                   'ckboxImageEdit',
                   'imageCaption',
                   'autoImage',

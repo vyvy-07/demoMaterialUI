@@ -8,14 +8,14 @@ const Menu = [
   },
   {
     id: '6018dbf03b03d94d64345ecd',
-    name: 'Soạn thảo',
-    alias: 'editArticle',
+    name: 'Soạn thảo Quill Js',
+    alias: 'quill',
     isDisplayOnMenu: true,
     parentId: '',
   },
   {
     id: '6018dbf03b03444d64345ecd',
-    name: 'ckeditor',
+    name: 'Soạn thảo ckeditor',
     alias: 'ckeditor',
     isDisplayOnMenu: true,
     parentId: '',
