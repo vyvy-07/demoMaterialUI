@@ -54,6 +54,8 @@ import {
   TableColumnResize,
   TableToolbar,
   TodoList,
+  toWidget,
+  toWidgetEditable,
   Underline,
   Widget,
   WordCount,
@@ -63,16 +65,16 @@ import 'ckeditor5-premium-features/ckeditor5-premium-features.css';
 import 'ckeditor5/ckeditor5.css';
 import { useRef, useState } from 'react';
 
+import { globalOpenPopUp, useModel } from '@/components/ModelContext';
+import PopUpModel from '@/components/PopUpModel';
 import {
   FullScreenIcon,
   GridIcon,
   GridIcon1x1,
   IconUploadMedia,
 } from '@/constant/iconCkeditor';
-import PopUpModel from '@/components/PopUpModel';
-import { globalOpenPopUp, useModel } from '@/components/ModelContext';
+import React from 'react';
 import './style.css';
-
 class ScreenPlugin extends Plugin {
   static get requires() {
     // ADDED
@@ -117,32 +119,9 @@ class CreateDiv extends Plugin {
     });
   }
 }
-class UploadMedia extends Plugin {
-  static get requires() {
-    // ADDED
-    return [Widget];
-  }
-  init() {
-    const editor = this.editor;
-    editor.ui.componentFactory.add('uploadMedia', () => {
-      const button = new ButtonView();
-      button.set({
-        label: 'uploadMedia',
-        // withText: true,
-        icon: IconUploadMedia,
-      });
-      button.on('execute', () => {
-        if (globalOpenPopUp) {
-          globalOpenPopUp(); // Use the globally defined openPopUp function
-        }
-      });
-      return button;
-    });
-  }
-}
+
 class Grid6x6 extends Plugin {
   static get requires() {
-    // ADDED
     return [Widget];
   }
   init() {
@@ -160,6 +139,9 @@ class Grid6x6 extends Plugin {
       allowContentOf: '$block', // Allow block content inside borderedCell
       allowAttributes: ['src', 'alt', 'controls'], // Allow media attributes
     });
+    const widgetTypeAroundPlugin = editor.plugins.get('WidgetTypeAround');
+
+    widgetTypeAroundPlugin.clearForceDisabled('grid6x6');
 
     // Step 2: Define upcast converter (HTML to Model)
     editor.conversion.for('upcast').elementToElement({
@@ -223,7 +205,7 @@ class Grid6x6 extends Plugin {
     editor.conversion.for('downcast').elementToElement({
       model: 'borderedCell',
       view: (modelElement, { writer }) => {
-        return writer.createContainerElement('p', { class: 'bordered-cell' });
+        return writer.createContainerElement('div', { class: 'bordered-cell' });
       },
     });
 
@@ -262,26 +244,25 @@ class Grid6x6 extends Plugin {
     });
   }
 }
-
 class Grid9x3 extends Plugin {
   static get requires() {
-    // ADDED
     return [Widget];
   }
+
   init() {
     const editor = this.editor;
 
-    // Step 1: Define schema for the grid6x6 container
+    // Step 1: Define schema for grid9x3 and cell9x3
     editor.model.schema.register('grid9x3', {
       isObject: true,
-      allowWhere: '$block', // Can be used where block elements are allowed
+      allowWhere: '$block',
     });
 
     editor.model.schema.register('cell9x3', {
       allowIn: 'grid9x3',
-      isBlock: true, // Đảm bảo nó là block element
-      allowContentOf: '$block', // Allow block content inside borderedCell
-      allowAttributes: ['src', 'alt', 'controls'], // Allow media attributes
+      isBlock: true,
+      allowContentOf: '$block',
+      allowAttributes: ['src', 'alt'],
     });
 
     // Step 2: Define upcast converter (HTML to Model)
@@ -289,29 +270,9 @@ class Grid9x3 extends Plugin {
       model: 'grid9x3',
       view: {
         name: 'div',
-        // classes: 'grid6x6',
-        styles: `display: grid;
-  grid-template-columns: 9fr 3fr;
-  gap: 4px;
-  border: 1px dashed #ccc;
-  min-height: 60px;`,
+        styles:
+          'display: grid; grid-template-columns: 9fr 3fr; gap: 4px; border: 1px dashed #ccc;',
       },
-    });
-    editor.model.change((writer) => {
-      // Create an image element
-      const imageElement = writer.createElement('imageBlock', {
-        src: 'path/to/image.jpg',
-        alt: 'Description',
-      });
-
-      // Find or create the borderedCell element where you want to insert the image
-      const borderedCell = writer.createElement('cell9x3');
-
-      // Append the image to the borderedCell
-      writer.append(imageElement, borderedCell);
-
-      // Insert the borderedCell into the editor content
-      editor.model.insertContent(borderedCell, editor.model.document.selection);
     });
 
     editor.conversion.for('upcast').elementToElement({
@@ -326,12 +287,10 @@ class Grid9x3 extends Plugin {
     editor.conversion.for('downcast').elementToElement({
       model: 'grid9x3',
       view: (modelElement, { writer }) => {
-        const gridDiv = writer.createContainerElement('div', {
-          class: '',
+        return writer.createContainerElement('div', {
           style:
-            'display: grid; grid-template-columns: 9fr 3fr; gap: 4px; border: 1px dashed #ccc; min-height: 60px;',
+            'display: grid; grid-template-columns: 9fr 3fr; gap: 4px; border: 1px dashed #ccc;',
         });
-        return gridDiv;
       },
     });
 
@@ -342,30 +301,22 @@ class Grid9x3 extends Plugin {
       },
     });
 
-    // Step 4: Add the button to the toolbar
+    // Step 4: Add grid9x3 button to toolbar
     editor.ui.componentFactory.add('grid9x3', (locale) => {
       const button = new ButtonView(locale);
-
       button.set({
-        label: 'Grid 9x3',
-        icon: GridIcon1x1,
+        label: 'Insert Grid 9x3',
         tooltip: true,
       });
 
-      // Insert the grid on button click
       button.on('execute', () => {
         editor.model.change((writer) => {
-          // Create grid6x6 element
           const gridElement = writer.createElement('grid9x3');
-
-          // Create two borderedCell elements as children of grid6x6
           const cell1 = writer.createElement('cell9x3');
           const cell2 = writer.createElement('cell9x3');
-
           writer.append(cell1, gridElement);
           writer.append(cell2, gridElement);
 
-          // Insert grid6x6 element into the editor at the current selection
           editor.model.insertContent(
             gridElement,
             editor.model.document.selection
@@ -378,46 +329,63 @@ class Grid9x3 extends Plugin {
   }
 }
 
-class InsertGrid extends Plugin {
+class UploadMedia extends Plugin {
+  static get requires() {
+    return [Widget]; // Khai báo Widget nếu cần thiết
+  }
+
   init() {
     const editor = this.editor;
 
-    // Step 4: Add the button to the toolbar
-    editor.ui.componentFactory.add('grid', (locale) => {
-      const button = new ButtonView(locale);
+    editor.ui.componentFactory.add('uploadMedia', () => {
+      const button = new ButtonView();
 
       button.set({
-        label: 'Grid 6x6',
-        icon: GridIcon,
-        tooltip: true,
+        label: 'Upload Media', // Tiêu đề của nút
+        icon: IconUploadMedia, // Icon nút
+        tooltip: true, // Hiển thị tooltip khi hover
       });
 
-      // Insert the grid on button click
+      // Khi người dùng nhấn vào nút
       button.on('execute', () => {
-        // Create a new element in the model with the desired styles
-        editor.model.change((writer) => {
-          const gridElement = writer.createElement('div', {
-            style:
-              'border:1px dashed #ccc;display:grid;gap:4px;grid-template-columns:9fr 3fr;min-height:60px;',
-          });
-
-          // Insert the element at the current cursor position
-          editor.model.insertContent(
-            gridElement,
-            editor.model.document.selection
-          );
-        });
+        globalOpenPopUp();
       });
 
       return button;
     });
+  }
+
+  // Hàm chèn ảnh vào vị trí con trỏ hiện tại
+  insertImageAtCursor(imageUrl: string) {
+    const editor = this.editor;
+
+    // Lấy vị trí con trỏ hiện tại
+    const selection = editor.model.document.selection;
+
+    // Đảm bảo có một vị trí selection hợp lệ
+    if (selection.rangeCount > 0) {
+      // Tạo phần tử ảnh mới
+      const imageElement = editor.model.change((writer) => {
+        return writer.createElement('imageBlock', {
+          src: imageUrl,
+          alt: 'Uploaded Image',
+        });
+      });
+
+      // Chèn phần tử hình ảnh vào vị trí hiện tại của con trỏ
+      editor.model.insertContent(imageElement, selection);
+    }
   }
 }
 
 function CustomEditor() {
-  const [word, setWord] = useState(0);
-  const [characters, setCharacters] = useState(0);
   const editorRef = useRef<any>(null);
+  const [word, setWord] = useState(0);
+  const [editorData, setEditorData] = useState<string>(
+    '<p>Initial content</p>'
+  );
+
+  const [characters, setCharacters] = useState(0);
   const { isOpen, openPopUp } = useModel();
   const editorConfig = {
     extraPlugins: [
@@ -438,7 +406,6 @@ function CustomEditor() {
             config={{
               plugins: [
                 CreateDiv,
-                InsertGrid,
                 UploadMedia,
                 Grid9x3,
                 Grid6x6,
@@ -496,7 +463,6 @@ function CustomEditor() {
               ],
               toolbar: {
                 items: [
-                  'createDiv',
                   'uploadMedia',
                   'grid',
 
@@ -557,17 +523,6 @@ function CustomEditor() {
                   'codeBlock',
                   'sourceEditing',
                   'highlight',
-                  // {
-                  //   label: 'More basic styles',
-                  //   icon: 'threeVerticalDots',
-                  //   items: [
-                  //     'horizontalLine',
-                  //     'pageBreak',
-                  //     'codeBlock',
-                  //     'sourceEditing',
-                  //     'highlight',
-                  //   ],
-                  // },
                 ],
                 shouldNotGroupWhenFull: true,
               },
@@ -663,11 +618,15 @@ function CustomEditor() {
             // onReady={(editor) => {
             //   console.log('Editor 1 is ready to use!', editor);
             // }}
+            // onChange={(event, editor) => {
+            //   setEditorData(editor.getData());
+            // }}
             onReady={(editor: any) => {
               // Gán CKEditor instance vào editorRef khi CKEditor sẵn sàng
               editorRef.current = editor;
             }}
           />
+
           <>
             <div className="ck ck-word-count px-4 flex items-center justify-end gap-1">
               <div className="ck-word-count__words">

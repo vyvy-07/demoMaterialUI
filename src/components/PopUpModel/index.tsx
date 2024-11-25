@@ -8,23 +8,56 @@ const PopUpModel = ({ editor }: { editor: any }) => {
     setImageSrc(src);
   };
   console.log('imageSrc :>> ', imageSrc);
+  // const closePopUp = () => {
+  //   if (imageSrc && editor) {
+  //     editor.model.change((writer: any) => {
+  //       const imageElement = writer.createElement('imageBlock', {
+  //         src: imageSrc,
+  //       });
+  //       editor.model.insertContent(
+  //         imageElement,
+  //         editor.model.document.selection
+  //       );
+  //     });
+  //   }
+  //   console.log('1 :>> ', 1);
+
+  //   setIsOpen(false);
+  // };
   const closePopUp = () => {
     if (imageSrc && editor) {
+      const selection = editor.model.document.selection;
+      const position = selection.getFirstPosition();
+
+      // Kiểm tra xem con trỏ chuột có đang trong phần tử p hay không
+      const targetP = position?.findAncestor('div.bordered-cell'); // Tìm p có class "bordered-cell"
+
       editor.model.change((writer: any) => {
-        const imageElement = writer.createElement('imageBlock', {
-          src: imageSrc,
-        });
-        editor.model.insertContent(
-          imageElement,
-          editor.model.document.selection
-        );
+        if (targetP) {
+          // Nếu con trỏ đang trong p, thay thế nội dung p bằng ảnh
+          const imageElement = writer.createElement('imageBlock', {
+            src: imageSrc,
+            alt: 'Uploaded Image',
+          });
+          // Tạo caption cho ảnh
+          const captionElement = writer.createElement('caption', {
+            contenteditable: 'true',
+          });
+          writer.insertText('Your Caption Here', captionElement);
+          // Chèn ảnh vào vị trí con trỏ trong p
+          // writer.remove(targetP); // Xóa nội dung hiện tại của p
+          writer.append(imageElement, targetP.getParent()); // Thêm ảnh vào phần tử cha của p (div)
+        } else {
+          // Nếu không trong p, chèn ảnh vào vị trí con trỏ hiện tại
+          const imageElement = writer.createElement('imageBlock', {
+            src: imageSrc,
+          });
+          writer.insert(imageElement, position); // Chèn vào vị trí con trỏ
+        }
       });
     }
-    console.log('1 :>> ', 1);
-
     setIsOpen(false);
   };
-
   return (
     <div>
       {isOpen && (
