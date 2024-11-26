@@ -8,22 +8,7 @@ const PopUpModel = ({ editor }: { editor: any }) => {
     setImageSrc(src);
   };
   console.log('imageSrc :>> ', imageSrc);
-  // const closePopUp = () => {
-  //   if (imageSrc && editor) {
-  //     editor.model.change((writer: any) => {
-  //       const imageElement = writer.createElement('imageBlock', {
-  //         src: imageSrc,
-  //       });
-  //       editor.model.insertContent(
-  //         imageElement,
-  //         editor.model.document.selection
-  //       );
-  //     });
-  //   }
-  //   console.log('1 :>> ', 1);
 
-  //   setIsOpen(false);
-  // };
   const closePopUp = () => {
     if (imageSrc && editor) {
       const selection = editor.model.document.selection;

@@ -14,7 +14,6 @@ import {
   ButtonView,
   ClassicEditor,
   CodeBlock,
-  Command,
   Essentials,
   FindAndReplace,
   FontBackgroundColor,
@@ -54,8 +53,6 @@ import {
   TableColumnResize,
   TableToolbar,
   TodoList,
-  toWidget,
-  toWidgetEditable,
   Underline,
   Widget,
   WordCount,
@@ -70,10 +67,10 @@ import PopUpModel from '@/components/PopUpModel';
 import {
   FullScreenIcon,
   GridIcon,
-  GridIcon1x1,
+  GridIcon6x6,
+  GridIcon9x3,
   IconUploadMedia,
 } from '@/constant/iconCkeditor';
-import React from 'react';
 import './style.css';
 class ScreenPlugin extends Plugin {
   static get requires() {
@@ -92,28 +89,6 @@ class ScreenPlugin extends Plugin {
       });
       button.on('execute', () => {
         ckeditor?.classList.toggle('active');
-      });
-      return button;
-    });
-  }
-}
-class CreateDiv extends Plugin {
-  static get requires() {
-    // ADDED
-    return [Widget];
-  }
-  init() {
-    const editor = this.editor;
-    editor.ui.componentFactory.add('createDiv', () => {
-      const button = new ButtonView();
-      const ckeditor: any = document?.querySelector('.ck-content ');
-      const text = document?.querySelectorAll('p');
-      button.set({
-        label: 'createDiv',
-        icon: FullScreenIcon,
-      });
-      button.on('execute', () => {
-        console.log('text :>> ', text);
       });
       return button;
     });
@@ -215,7 +190,7 @@ class Grid6x6 extends Plugin {
 
       button.set({
         label: 'Grid 6x6',
-        icon: GridIcon1x1,
+        icon: GridIcon6x6,
         tooltip: true,
       });
 
@@ -306,6 +281,7 @@ class Grid9x3 extends Plugin {
       const button = new ButtonView(locale);
       button.set({
         label: 'Insert Grid 9x3',
+        icon: GridIcon9x3,
         tooltip: true,
       });
 
@@ -405,7 +381,6 @@ function CustomEditor() {
             editor={ClassicEditor}
             config={{
               plugins: [
-                CreateDiv,
                 UploadMedia,
                 Grid9x3,
                 Grid6x6,
@@ -498,7 +473,7 @@ function CustomEditor() {
 
                   {
                     label: 'Grid Layout',
-                    // icon: GridIcon,
+                    icon: GridIcon,
                     items: [
                       'grid12',
                       'grid6x6',
