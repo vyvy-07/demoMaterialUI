@@ -5,7 +5,7 @@ const QuillJs = () => {
   return (
     <div>
       this is
-      <TextEditor />
+      {/* <TextEditor /> */}
     </div>
   );
 };
