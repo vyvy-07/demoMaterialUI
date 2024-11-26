@@ -6,13 +6,13 @@ const Menu = [
     isDisplayOnMenu: true,
     parentId: '',
   },
-  {
-    id: '6018dbf03b03d94d64345ecd',
-    name: 'Soạn thảo Quill Js',
-    alias: 'quill',
-    isDisplayOnMenu: true,
-    parentId: '',
-  },
+  // {
+  //   id: '6018dbf03b03d94d64345ecd',
+  //   name: 'Soạn thảo Quill Js',
+  //   alias: 'quill',
+  //   isDisplayOnMenu: true,
+  //   parentId: '',
+  // },
   {
     id: '6018dbf03b03444d64345ecd',
     name: 'Soạn thảo ckeditor',
