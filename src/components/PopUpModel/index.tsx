@@ -11,38 +11,66 @@ const PopUpModel = ({ editor }: { editor: any }) => {
 
   const closePopUp = () => {
     if (imageSrc && editor) {
-      const selection = editor.model.document.selection;
-      const position = selection.getFirstPosition();
-
-      // Kiểm tra xem con trỏ chuột có đang trong phần tử p hay không
-      const targetP = position?.findAncestor('div.bordered-cell'); // Tìm p có class "bordered-cell"
-
       editor.model.change((writer: any) => {
-        if (targetP) {
-          // Nếu con trỏ đang trong p, thay thế nội dung p bằng ảnh
-          const imageElement = writer.createElement('imageBlock', {
-            src: imageSrc,
-            alt: 'Uploaded Image',
+        // Kiểm tra xem caption đã được đăng ký chưa
+        if (!editor.model.schema.isRegistered('caption')) {
+          editor.model.schema.register('caption', {
+            isLimit: true,
+            allowIn: 'imageBlock', // Cho phép caption bên trong imageBlock
+            allowContentOf: '$block', // Caption có thể chứa văn bản
           });
-          // Tạo caption cho ảnh
-          const captionElement = writer.createElement('caption', {
-            contenteditable: 'true',
-          });
-          writer.insertText('Your Caption Here', captionElement);
-          // Chèn ảnh vào vị trí con trỏ trong p
-          // writer.remove(targetP); // Xóa nội dung hiện tại của p
-          writer.append(imageElement, targetP.getParent()); // Thêm ảnh vào phần tử cha của p (div)
-        } else {
-          // Nếu không trong p, chèn ảnh vào vị trí con trỏ hiện tại
-          const imageElement = writer.createElement('imageBlock', {
-            src: imageSrc,
-          });
-          writer.insert(imageElement, position); // Chèn vào vị trí con trỏ
         }
+
+        // Mở rộng schema cho imageBlock để cho phép các thuộc tính như src và alt
+        editor.model.schema.extend('imageBlock', {
+          allowAttributes: ['alt', 'src'], // Các thuộc tính của imageBlock
+        });
+
+        const selection = editor.model.document.selection;
+        const position = selection.getFirstPosition();
+
+        // Tạo phần tử imageBlock với src và alt
+        const imageElement = writer.createElement('imageBlock', {
+          src: imageSrc, // URL ảnh
+          alt: 'Uploaded Image', // Thuộc tính alt của ảnh
+        });
+        writer.insert(imageElement, position);
+
+        editor.conversion.for('downcast').elementToElement({
+          model: 'caption',
+          view: (modelElement: any, { writer }: { writer: any }) => {
+            // Lấy text của caption từ model
+            const captionText =
+              modelElement.childCount > 0
+                ? modelElement.getChild(0).data
+                : 'Enter image caption here';
+
+            // Tạo phần tử model cho figcaption
+            const figcaptionElement = writer.createElement('caption');
+
+            // Tạo một văn bản trong model
+            const textNode = writer.createText(captionText);
+
+            // Chèn văn bản vào phần tử caption
+            writer.append(textNode, figcaptionElement);
+
+            // Chuyển thành phần tử DOM trong quá trình downcast
+            return writer.createEditableElement('figcaption', {
+              class: 'ck-editor__editable ck-editor__nested-editable',
+              'data-placeholder': 'Enter image caption', // Đặt placeholder
+              role: 'textbox', // Đảm bảo vai trò của phần tử là textbox
+              tabindex: '-1', // Đảm bảo tab không đi qua nó, có thể thay đổi tùy theo yêu cầu
+              'aria-label': `Caption for image: ${captionText}`, // Đặt aria-label cho phần tử
+              contenteditable: 'true', // Đảm bảo phần tử có thể chỉnh sửa
+            });
+          },
+        });
       });
     }
-    setIsOpen(false);
+
+    setIsOpen(false); // Đóng pop-up sau khi hoàn thành
   };
+
   return (
     <div>
       {isOpen && (

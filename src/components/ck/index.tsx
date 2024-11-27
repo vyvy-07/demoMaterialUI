@@ -94,6 +94,32 @@ class ScreenPlugin extends Plugin {
     });
   }
 }
+class UploadMedia extends Plugin {
+  static get requires() {
+    return [Widget]; // Khai báo Widget nếu cần thiết
+  }
+
+  init() {
+    const editor = this.editor;
+
+    editor.ui.componentFactory.add('uploadMedia', () => {
+      const button = new ButtonView();
+
+      button.set({
+        label: 'Upload Media', // Tiêu đề của nút
+        icon: IconUploadMedia, // Icon nút
+        tooltip: true, // Hiển thị tooltip khi hover
+      });
+
+      // Khi người dùng nhấn vào nút
+      button.on('execute', () => {
+        globalOpenPopUp();
+      });
+
+      return button;
+    });
+  }
+}
 
 class Grid6x6 extends Plugin {
   static get requires() {
@@ -227,7 +253,7 @@ class Grid9x3 extends Plugin {
   init() {
     const editor = this.editor;
 
-    // Step 1: Define schema for grid9x3 and cell9x3
+    // Đăng ký schema cho grid9x3 và cell9x3
     editor.model.schema.register('grid9x3', {
       isObject: true,
       allowWhere: '$block',
@@ -240,7 +266,17 @@ class Grid9x3 extends Plugin {
       allowAttributes: ['src', 'alt'],
     });
 
-    // Step 2: Define upcast converter (HTML to Model)
+    editor.model.schema.extend('cell9x3', {
+      allowContentOf: '$root', // Cho phép các phần tử cấp block bên trong
+    });
+
+    // Đăng ký schema cho caption và đảm bảo nó là widget để có thể chỉnh sửa
+    editor.model.schema.register('caption', {
+      allowIn: 'imageBlock',
+      allowContentOf: '$block',
+    });
+
+    // Upcast và downcast cho grid9x3 và cell9x3
     editor.conversion.for('upcast').elementToElement({
       model: 'grid9x3',
       view: {
@@ -258,7 +294,6 @@ class Grid9x3 extends Plugin {
       },
     });
 
-    // Step 3: Define downcast converter (Model to HTML)
     editor.conversion.for('downcast').elementToElement({
       model: 'grid9x3',
       view: (modelElement, { writer }) => {
@@ -276,7 +311,7 @@ class Grid9x3 extends Plugin {
       },
     });
 
-    // Step 4: Add grid9x3 button to toolbar
+    // Thêm nút grid9x3 vào toolbar
     editor.ui.componentFactory.add('grid9x3', (locale) => {
       const button = new ButtonView(locale);
       button.set({
@@ -302,55 +337,6 @@ class Grid9x3 extends Plugin {
 
       return button;
     });
-  }
-}
-
-class UploadMedia extends Plugin {
-  static get requires() {
-    return [Widget]; // Khai báo Widget nếu cần thiết
-  }
-
-  init() {
-    const editor = this.editor;
-
-    editor.ui.componentFactory.add('uploadMedia', () => {
-      const button = new ButtonView();
-
-      button.set({
-        label: 'Upload Media', // Tiêu đề của nút
-        icon: IconUploadMedia, // Icon nút
-        tooltip: true, // Hiển thị tooltip khi hover
-      });
-
-      // Khi người dùng nhấn vào nút
-      button.on('execute', () => {
-        globalOpenPopUp();
-      });
-
-      return button;
-    });
-  }
-
-  // Hàm chèn ảnh vào vị trí con trỏ hiện tại
-  insertImageAtCursor(imageUrl: string) {
-    const editor = this.editor;
-
-    // Lấy vị trí con trỏ hiện tại
-    const selection = editor.model.document.selection;
-
-    // Đảm bảo có một vị trí selection hợp lệ
-    if (selection.rangeCount > 0) {
-      // Tạo phần tử ảnh mới
-      const imageElement = editor.model.change((writer) => {
-        return writer.createElement('imageBlock', {
-          src: imageUrl,
-          alt: 'Uploaded Image',
-        });
-      });
-
-      // Chèn phần tử hình ảnh vào vị trí hiện tại của con trỏ
-      editor.model.insertContent(imageElement, selection);
-    }
   }
 }
 
@@ -382,6 +368,7 @@ function CustomEditor() {
             config={{
               plugins: [
                 UploadMedia,
+
                 Grid9x3,
                 Grid6x6,
                 Alignment,
@@ -440,7 +427,7 @@ function CustomEditor() {
                 items: [
                   'uploadMedia',
                   'grid',
-
+                  'insertImage',
                   'removeFormat',
                   '|',
                   'undo',
@@ -503,7 +490,6 @@ function CustomEditor() {
               },
 
               image: {
-                styles: {},
                 toolbar: [
                   // 'toggleImageCaption',
                   // 'imageTextAlternative',
@@ -524,9 +510,9 @@ function CustomEditor() {
                   'toggleImageCaption',
                   'imageTextAlternative',
                 ],
-                insert: {
-                  integrations: ['upload', 'assetManager', 'url'],
-                },
+                // insert: {
+                //   integrations: ['upload', 'assetManager', 'url'],
+                // },
               },
               wordCount: {
                 onUpdate: (stats) => {
