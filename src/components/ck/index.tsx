@@ -55,6 +55,8 @@ import {
   TableColumnResize,
   TableToolbar,
   TodoList,
+  toWidget,
+  toWidgetEditable,
   Underline,
   Widget,
   WordCount,
@@ -154,7 +156,7 @@ class Grid9x3 extends Plugin {
 
     // Đăng ký schema cho caption và đảm bảo nó là widget để có thể chỉnh sửa
     editor.model.schema.register('caption', {
-      allowIn: ['imageBlock', 'grid9x3'],
+      allowIn: ['imageBlock', 'grid9x3', 'grid6x6', 'grid3x6x3', 'Grid2x8x2'],
       allowContentOf: '$block',
     });
 
@@ -315,6 +317,186 @@ class Grid6x6 extends Plugin {
     });
   }
 }
+class Grid3x6x3 extends Plugin {
+  static get requires() {
+    return [Widget];
+  }
+
+  init() {
+    const editor = this.editor;
+
+    // Đăng ký schema cho Grid3x6x3 và Cell3x6x3
+    editor.model.schema.register('grid3x6x3', {
+      isObject: true,
+      allowWhere: '$block',
+    });
+
+    editor.model.schema.register('cell3x6x3', {
+      allowIn: 'grid3x6x3',
+      isBlock: true,
+      allowContentOf: '$block',
+      allowAttributes: ['src', 'alt'],
+    });
+
+    editor.model.schema.extend('cell3x6x3', {
+      allowContentOf: '$root', // Cho phép các phần tử cấp block bên trong
+    });
+
+    // Upcast và downcast cho Grid3x6x3 và Cell3x6x3
+    editor.conversion.for('upcast').elementToElement({
+      model: 'grid3x6x3',
+      view: {
+        name: 'div',
+        styles:
+          'display: grid; grid-template-columns: 3fr 6fr 3fr; gap: 4px; border: 1px dashed #ccc;',
+      },
+    });
+
+    editor.conversion.for('upcast').elementToElement({
+      model: 'cell3x6x3',
+      view: {
+        name: 'div',
+        classes: 'bordered-cell',
+      },
+    });
+
+    editor.conversion.for('downcast').elementToElement({
+      model: 'grid3x6x3',
+      view: (modelElement, { writer }) => {
+        return writer.createContainerElement('div', {
+          style:
+            'display: grid; grid-template-columns: 3fr 6fr 3fr; gap: 4px; border: 1px dashed #ccc;',
+        });
+      },
+    });
+
+    editor.conversion.for('downcast').elementToElement({
+      model: 'cell3x6x3',
+      view: (modelElement, { writer }) => {
+        return writer.createContainerElement('div', { class: 'bordered-cell' });
+      },
+    });
+
+    // Thêm nút Grid3x6x3 vào toolbar
+    editor.ui.componentFactory.add('grid3x6x3', (locale) => {
+      const button = new ButtonView(locale);
+      button.set({
+        label: 'Insert Grid 3x6x3',
+        icon: '',
+        withText: true,
+        tooltip: true,
+      });
+
+      button.on('execute', () => {
+        editor.model.change((writer) => {
+          const gridElement = writer.createElement('grid3x6x3');
+          // Thêm 3 cell tương ứng với cấu hình 3x6x3
+          for (let i = 0; i < 3; i++) {
+            const cell = writer.createElement('cell3x6x3');
+            writer.append(cell, gridElement);
+          }
+
+          editor.model.insertContent(
+            gridElement,
+            editor.model.document.selection
+          );
+        });
+      });
+
+      return button;
+    });
+  }
+}
+class Grid2x8x2 extends Plugin {
+  static get requires() {
+    return [Widget];
+  }
+
+  init() {
+    const editor = this.editor;
+
+    // Đăng ký schema cho Grid2x8x2 và Cell2x8x2
+    editor.model.schema.register('grid2x8x2', {
+      isObject: true,
+      allowWhere: '$block',
+    });
+
+    editor.model.schema.register('cell2x8x2', {
+      allowIn: 'grid2x8x2',
+      isBlock: true,
+      allowContentOf: '$block',
+      allowAttributes: ['src', 'alt'],
+    });
+
+    editor.model.schema.extend('cell2x8x2', {
+      allowContentOf: '$root', // Cho phép các phần tử cấp block bên trong
+    });
+
+    // Upcast và downcast cho Grid2x8x2 và Cell2x8x2
+    editor.conversion.for('upcast').elementToElement({
+      model: 'grid2x8x2',
+      view: {
+        name: 'div',
+        styles:
+          'display: grid; grid-template-columns: 2fr 8fr 2fr; gap: 4px; border: 1px dashed #ccc;',
+      },
+    });
+
+    editor.conversion.for('upcast').elementToElement({
+      model: 'cell2x8x2',
+      view: {
+        name: 'div',
+        classes: 'bordered-cell',
+      },
+    });
+
+    editor.conversion.for('downcast').elementToElement({
+      model: 'grid2x8x2',
+      view: (modelElement, { writer }) => {
+        return writer.createContainerElement('div', {
+          style:
+            'display: grid; grid-template-columns: 2fr 8fr 2fr; gap: 4px; border: 1px dashed #ccc;',
+        });
+      },
+    });
+
+    editor.conversion.for('downcast').elementToElement({
+      model: 'cell2x8x2',
+      view: (modelElement, { writer }) => {
+        return writer.createContainerElement('div', { class: 'bordered-cell' });
+      },
+    });
+
+    // Thêm nút Grid2x8x2 vào toolbar
+    editor.ui.componentFactory.add('grid2x8x2', (locale) => {
+      const button = new ButtonView(locale);
+      button.set({
+        label: 'Insert Grid 2x8x2',
+        icon: '',
+        withText: true, // Đảm bảo có biểu tượng GridIcon2x8x2
+        tooltip: true,
+      });
+
+      button.on('execute', () => {
+        editor.model.change((writer) => {
+          const gridElement = writer.createElement('grid2x8x2');
+          // Thêm 3 cell tương ứng với cấu hình 2x8x2
+          for (let i = 0; i < 3; i++) {
+            const cell = writer.createElement('cell2x8x2');
+            writer.append(cell, gridElement);
+          }
+
+          editor.model.insertContent(
+            gridElement,
+            editor.model.document.selection
+          );
+        });
+      });
+
+      return button;
+    });
+  }
+}
 
 function CustomEditor() {
   const editorRef = useRef<any>(null);
@@ -344,8 +526,8 @@ function CustomEditor() {
             config={{
               plugins: [
                 UploadMedia,
-                // LayoutDropdownPlugin,
-                // GridLayoutPlugin,
+                Grid3x6x3,
+                Grid2x8x2,
                 Grid9x3,
                 Grid6x6,
                 Alignment,
@@ -402,11 +584,9 @@ function CustomEditor() {
               ],
               toolbar: {
                 items: [
-                  'layoutDropdown',
-                  'gridLayout',
                   'uploadMedia',
                   'grid',
-                  'insertImage',
+                  // 'insertImage',
                   'removeFormat',
                   '|',
                   'undo',
@@ -448,6 +628,8 @@ function CustomEditor() {
                       'grid3x3',
                       'grid2x1',
                       'grid4x1',
+                      'grid2x8x2',
+                      'grid3x6x3',
                     ],
                   },
                   {
@@ -549,8 +731,7 @@ function CustomEditor() {
                 contentToolbar: ['tableColumn', 'tableRow', 'mergeTableCells'],
               },
             }}
-            data="<div>Hello from the first editor working with the context!</div>
-          "
+            data="<p>Hello from the first editor working with the context!</p>"
             contextItemMetadata={{
               name: 'editor1',
               yourAdditionalData: 2,

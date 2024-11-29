@@ -10,67 +10,84 @@ const PopUpModel = ({ editor }: { editor: any }) => {
   const closePopUp = () => {
     if (imageSrc && editor) {
       editor.model.change((writer: any) => {
-        // Kiểm tra xem caption đã được đăng ký chưa
+        // Đăng ký schema cho caption nếu chưa đăng ký
         if (!editor.model.schema.isRegistered('caption')) {
           editor.model.schema.register('caption', {
-            allowIn: ['imageBlock', 'grid9x3', 'grid6x6'],
-            allowContentOf: '$block', // Caption có thể chứa văn bản
+            allowIn: [
+              'imageBlock',
+              'grid9x3',
+              'grid6x6',
+              'grid3x6x3',
+              'Grid2x8x2',
+            ],
+            allowContentOf: '$block',
           });
         }
 
-        // Mở rộng schema cho imageBlock để cho phép các thuộc tính như src và alt
+        // Đảm bảo imageBlock cho phép src và alt
         editor.model.schema.extend('imageBlock', {
-          allowAttributes: ['alt', 'src'], // Các thuộc tính của imageBlock
+          allowAttributes: ['alt', 'src'],
         });
 
         const selection = editor.model.document.selection;
-        const position = selection.getFirstPosition();
+        let position = selection.getFirstPosition();
 
-        // Kiểm tra xem con trỏ có đang ở trong thẻ <p> không
+        // Kiểm tra nếu con trỏ nằm trong thẻ <p>
         const parentElement = position.parent;
         if (parentElement.is('element', 'paragraph')) {
-          // Nếu con trỏ đang ở trong thẻ <p>, xóa thẻ này
-          writer.remove(parentElement);
+          position = writer.createPositionBefore(parentElement); // Di chuyển con trỏ ra ngoài
+          writer.remove(parentElement); // Xóa thẻ <p>
         }
 
-        // Kiểm tra lại position có hợp lệ không
-        const newPosition = editor.model.document.selection.getFirstPosition();
-
-        // Tạo phần tử imageBlock với src và alt
+        // Tạo phần tử hình ảnh
         const imageElement = writer.createElement('imageBlock', {
-          src: imageSrc, // URL ảnh
-          alt: 'Ảnh đã tải lên', // Thuộc tính alt của ảnh
+          src: imageSrc,
+          alt: 'Ảnh đã tải lên',
         });
 
-        // Chèn hình ảnh vào vị trí hợp lệ
-        writer.insert(imageElement, newPosition); // Chèn hình ảnh vào vị trí hiện tại
+        // Chèn ảnh vào vị trí mới
+        writer.insert(imageElement, position);
 
-        // Đăng ký và xử lý caption cho ảnh
+        // Tự động thêm caption nếu cần
+        const captionElement = writer.createElement('caption');
+        // const textNode = writer.createText('Caption cho ảnh ở đây');
+        // writer.append(textNode, captionElement);
+        writer.append(captionElement, imageElement); // Gắn caption vào hình ảnh
+
+        // Đảm bảo caption có thể chỉnh sửa
         editor.conversion.for('downcast').elementToElement({
           model: 'caption',
           view: (modelElement: any, { writer }: { writer: any }) => {
-            const captionText =
-              modelElement.childCount > 0
-                ? modelElement.getChild(0).data
-                : 'Nhập caption cho ảnh ở đây';
-
-            const figcaptionElement = writer.createElement('caption');
-            const textNode = writer.createText(captionText);
-            writer.append(textNode, figcaptionElement);
-
             return writer.createEditableElement('figcaption', {
               class: 'ck-editor__editable ck-editor__nested-editable',
-              'data-placeholder': 'Nhập caption cho ảnh ở đây',
-              role: 'textbox',
-              tabindex: '-1',
-              'aria-label': `Caption cho ảnh: ${captionText}`,
-              contenteditable: 'true',
+              'data-placeholder': 'Caption cho ảnh ở đây',
             });
           },
         });
       });
+      // Lắng nghe sự kiện thay đổi để kiểm tra nội dung của caption
+      editor.model.document.on('change:data', () => {
+        editor.model.change((writer: any) => {
+          // Lấy tất cả các thẻ `caption` trong tài liệu
+          const captions = Array.from(
+            editor.model.document.getRoot().getChildren()
+          ).filter((element: any) => element.name === 'caption');
 
-      setIsOpen(false); // Đóng pop-up sau khi hoàn thành
+          captions.forEach((caption: any) => {
+            // Lấy nội dung văn bản trong `caption`
+            const content = Array.from(caption.getChildren())
+              .map((child: any) => child.data || '') // Lấy dữ liệu văn bản
+              .join('')
+              .replace(/[\u00A0\s]/g, ''); // Xóa tất cả khoảng trắng và `&nbsp;`
+
+            // Kiểm tra nếu nội dung hoàn toàn trống
+            if (!content) {
+              writer.remove(caption); // Xóa thẻ `caption` nếu trống
+            }
+          });
+        });
+      });
+      setIsOpen(false); // Đóng pop-up
     }
   };
 

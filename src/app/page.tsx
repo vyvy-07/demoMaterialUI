@@ -11,6 +11,7 @@ import { styled } from '@mui/material/styles';
 import * as React from 'react';
 import axios from 'axios';
 import { Button } from '@mui/material';
+import { GridIcon3x6x3 } from '@/constant/iconCkeditor';
 const Item = styled(Paper)(({ theme }) => ({
   // color: 'secondary',
 }));
@@ -51,34 +52,107 @@ export default function Dashboard() {
   // };
 
   return (
-    <Box sx={{ flexGrow: 1, width: '100%' }}>
-      <Button>post</Button>
-      <Grid container spacing={2}>
-        <Grid item xs={6} md={8}>
-          <Item>
+    <>
+      <div>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 100">
+          <g fill="none" stroke="black" stroke-width="1">
+            <rect x="10" y="10" width="50" height="50" stroke="black" />
+            <text x="25" y="40" font-family="Arial" font-size="20" fill="black">
+              66
+            </text>
+
+            <rect x="70" y="10" width="50" height="50" stroke="black" />
+            <text x="85" y="40" font-family="Arial" font-size="20" fill="black">
+              39
+            </text>
+
+            <rect x="130" y="10" width="50" height="50" stroke="black" />
+            <text
+              x="145"
+              y="40"
+              font-family="Arial"
+              font-size="20"
+              fill="black"
+            >
+              93
+            </text>
+
+            <rect x="190" y="10" width="50" height="50" stroke="black" />
+            <text
+              x="205"
+              y="40"
+              font-family="Arial"
+              font-size="20"
+              fill="black"
+            >
+              48
+            </text>
+
+            <rect x="250" y="10" width="50" height="50" stroke="black" />
+            <text
+              x="265"
+              y="40"
+              font-family="Arial"
+              font-size="20"
+              fill="black"
+            >
+              84
+            </text>
+
+            <rect x="310" y="10" width="50" height="50" stroke="black" />
+            <text
+              x="325"
+              y="40"
+              font-family="Arial"
+              font-size="20"
+              fill="black"
+            >
+              444
+            </text>
+
+            <rect x="370" y="10" width="50" height="50" stroke="black" />
+            <text
+              x="385"
+              y="40"
+              font-family="Arial"
+              font-size="20"
+              fill="black"
+            >
+              363
+            </text>
+          </g>
+        </svg>
+      </div>
+
+      <Box sx={{ flexGrow: 1, width: '100%' }}>
+        <Button>post</Button>
+        <Grid container spacing={2}>
+          <Grid item xs={6} md={8}>
+            <Item>
+              <CardLarge />
+            </Item>
+          </Grid>
+          <Grid item xs={6} md={4}>
             <CardLarge />
-          </Item>
+          </Grid>
+          <Grid item xs={6} md={4}>
+            <Item>
+              <BasicPie />
+            </Item>
+          </Grid>
+          <Grid item xs={6} md={8}>
+            <Item>
+              <SimpleBarChart />
+            </Item>
+          </Grid>
+          <Grid xs={6} md={8}>
+            <Item></Item>
+          </Grid>
+          <Grid xs={6} md={4}>
+            <Item></Item>
+          </Grid>
         </Grid>
-        <Grid item xs={6} md={4}>
-          <CardLarge />
-        </Grid>
-        <Grid item xs={6} md={4}>
-          <Item>
-            <BasicPie />
-          </Item>
-        </Grid>
-        <Grid item xs={6} md={8}>
-          <Item>
-            <SimpleBarChart />
-          </Item>
-        </Grid>
-        <Grid xs={6} md={8}>
-          <Item></Item>
-        </Grid>
-        <Grid xs={6} md={4}>
-          <Item></Item>
-        </Grid>
-      </Grid>
-    </Box>
+      </Box>
+    </>
   );
 }

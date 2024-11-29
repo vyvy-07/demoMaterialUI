@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 100">
+  <g fill="none" stroke="black" stroke-width="2">
+    <!-- Icon 66 -->
+    <rect x="10" y="10" width="40" height="40" stroke="black" />
+    <text x="20" y="35" font-family="Arial" font-size="18" fill="black">66</text>
+    
+    <!-- Icon 39 -->
+    <rect x="60" y="10" width="40" height="40" stroke="black" />
+    <text x="70" y="35" font-family="Arial" font-size="18" fill="black">39</text>
+    
+    <!-- Icon 93 -->
+    <rect x="110" y="10" width="40" height="40" stroke="black" />
+    <text x="120" y="35" font-family="Arial" font-size="18" fill="black">93</text>
+    
+    <!-- Icon 48 -->
+    <rect x="160" y="10" width="40" height="40" stroke="black" />
+    <text x="170" y="35" font-family="Arial" font-size="18" fill="black">48</text>
+    
+    <!-- Icon 84 -->
+    <rect x="210" y="10" width="40" height="40" stroke="black" />
+    <text x="220" y="35" font-family="Arial" font-size="18" fill="black">84</text>
+    
+    <!-- Icon 444 -->
+    <rect x="260" y="10" width="40" height="40" stroke="black" />
+    <text x="270" y="35" font-family="Arial" font-size="18" fill="black">444</text>
+    
+    <!-- Icon 363 -->
+    <rect x="310" y="10" width="40" height="40" stroke="black" />
+    <text x="320" y="35" font-family="Arial" font-size="18" fill="black">363</text>
+  </g>
+</svg>
