@@ -7,16 +7,13 @@ const PopUpModel = ({ editor }: { editor: any }) => {
   const chooseImage = (src: string) => {
     setImageSrc(src);
   };
-  console.log('imageSrc :>> ', imageSrc);
-
   const closePopUp = () => {
     if (imageSrc && editor) {
       editor.model.change((writer: any) => {
         // Kiểm tra xem caption đã được đăng ký chưa
         if (!editor.model.schema.isRegistered('caption')) {
           editor.model.schema.register('caption', {
-            isLimit: true,
-            allowIn: 'imageBlock', // Cho phép caption bên trong imageBlock
+            allowIn: ['imageBlock', 'grid9x3', 'grid6x6'],
             allowContentOf: '$block', // Caption có thể chứa văn bản
           });
         }
@@ -29,46 +26,52 @@ const PopUpModel = ({ editor }: { editor: any }) => {
         const selection = editor.model.document.selection;
         const position = selection.getFirstPosition();
 
+        // Kiểm tra xem con trỏ có đang ở trong thẻ <p> không
+        const parentElement = position.parent;
+        if (parentElement.is('element', 'paragraph')) {
+          // Nếu con trỏ đang ở trong thẻ <p>, xóa thẻ này
+          writer.remove(parentElement);
+        }
+
+        // Kiểm tra lại position có hợp lệ không
+        const newPosition = editor.model.document.selection.getFirstPosition();
+
         // Tạo phần tử imageBlock với src và alt
         const imageElement = writer.createElement('imageBlock', {
           src: imageSrc, // URL ảnh
-          alt: 'Uploaded Image', // Thuộc tính alt của ảnh
+          alt: 'Ảnh đã tải lên', // Thuộc tính alt của ảnh
         });
-        writer.insert(imageElement, position);
 
+        // Chèn hình ảnh vào vị trí hợp lệ
+        writer.insert(imageElement, newPosition); // Chèn hình ảnh vào vị trí hiện tại
+
+        // Đăng ký và xử lý caption cho ảnh
         editor.conversion.for('downcast').elementToElement({
           model: 'caption',
           view: (modelElement: any, { writer }: { writer: any }) => {
-            // Lấy text của caption từ model
             const captionText =
               modelElement.childCount > 0
                 ? modelElement.getChild(0).data
-                : 'Enter image caption here';
+                : 'Nhập caption cho ảnh ở đây';
 
-            // Tạo phần tử model cho figcaption
             const figcaptionElement = writer.createElement('caption');
-
-            // Tạo một văn bản trong model
             const textNode = writer.createText(captionText);
-
-            // Chèn văn bản vào phần tử caption
             writer.append(textNode, figcaptionElement);
 
-            // Chuyển thành phần tử DOM trong quá trình downcast
             return writer.createEditableElement('figcaption', {
               class: 'ck-editor__editable ck-editor__nested-editable',
-              'data-placeholder': 'Enter image caption', // Đặt placeholder
-              role: 'textbox', // Đảm bảo vai trò của phần tử là textbox
-              tabindex: '-1', // Đảm bảo tab không đi qua nó, có thể thay đổi tùy theo yêu cầu
-              'aria-label': `Caption for image: ${captionText}`, // Đặt aria-label cho phần tử
-              contenteditable: 'true', // Đảm bảo phần tử có thể chỉnh sửa
+              'data-placeholder': 'Nhập caption cho ảnh ở đây',
+              role: 'textbox',
+              tabindex: '-1',
+              'aria-label': `Caption cho ảnh: ${captionText}`,
+              contenteditable: 'true',
             });
           },
         });
       });
-    }
 
-    setIsOpen(false); // Đóng pop-up sau khi hoàn thành
+      setIsOpen(false); // Đóng pop-up sau khi hoàn thành
+    }
   };
 
   return (
@@ -80,13 +83,13 @@ const PopUpModel = ({ editor }: { editor: any }) => {
               <h1 className="text-[24px] ">MEDIA</h1>
             </div>
             <div
-              className="w-[30px] h-[30px] cursor-pointer "
+              className="w-[90px] bg-slate-300  rounded-sm p-3 flex items-center h-[30px] cursor-pointer "
               onClick={closePopUp}
             >
               chèn
               <img
                 className="w-full h-full object-cover"
-                src="../img.svg"
+                src="/close.svg"
                 alt=""
               />
             </div>

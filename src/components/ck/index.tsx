@@ -14,6 +14,7 @@ import {
   ButtonView,
   ClassicEditor,
   CodeBlock,
+  createDropdown,
   Essentials,
   FindAndReplace,
   FontBackgroundColor,
@@ -38,6 +39,7 @@ import {
   List,
   MediaEmbed,
   Mention,
+  // Model,
   PageBreak,
   Paragraph,
   PictureEditing,
@@ -101,6 +103,10 @@ class UploadMedia extends Plugin {
 
   init() {
     const editor = this.editor;
+    // editor.model.schema.register('caption', {
+    //   allowIn: 'imageBlock',
+    //   allowContentOf: '$block',
+    // });
 
     editor.ui.componentFactory.add('uploadMedia', () => {
       const button = new ButtonView();
@@ -121,130 +127,6 @@ class UploadMedia extends Plugin {
   }
 }
 
-class Grid6x6 extends Plugin {
-  static get requires() {
-    return [Widget];
-  }
-  init() {
-    const editor = this.editor;
-
-    // Step 1: Define schema for the grid6x6 container
-    editor.model.schema.register('grid6x6', {
-      isObject: true,
-      allowWhere: '$block', // Can be used where block elements are allowed
-    });
-
-    editor.model.schema.register('borderedCell', {
-      allowIn: 'grid6x6',
-      isBlock: true, // Đảm bảo nó là block element
-      allowContentOf: '$block', // Allow block content inside borderedCell
-      allowAttributes: ['src', 'alt', 'controls'], // Allow media attributes
-    });
-    const widgetTypeAroundPlugin = editor.plugins.get('WidgetTypeAround');
-
-    widgetTypeAroundPlugin.clearForceDisabled('grid6x6');
-
-    // Step 2: Define upcast converter (HTML to Model)
-    editor.conversion.for('upcast').elementToElement({
-      model: 'grid6x6',
-      view: {
-        name: 'div',
-        classes: 'grid6x6',
-        styles: `display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 4px;
-  border: 1px dashed #ccc;
-  min-height: 60px;`,
-      },
-    });
-    editor.model.change((writer) => {
-      // Create an image element
-      const imageElement = writer.createElement('imageBlock', {
-        src: 'path/to/image.jpg',
-        alt: 'Description',
-      });
-      // if (imageSrc && editor) {
-      editor.model.change((writer: any) => {
-        const imageElement = writer.createElement('imageBlock', {
-          src: 'path/to/image.jpg',
-          alt: 'Description',
-        });
-        editor.model.insertContent(
-          imageElement,
-          editor.model.document.selection
-        );
-      });
-      // }
-      const borderedCell = writer.createElement('img');
-
-      writer.append(imageElement, borderedCell);
-
-      editor.model.insertContent(borderedCell, editor.model.document.selection);
-    });
-
-    editor.conversion.for('upcast').elementToElement({
-      model: 'borderedCell',
-      view: {
-        name: 'div',
-        classes: 'bordered-cell',
-      },
-    });
-
-    // Step 3: Define downcast converter (Model to HTML)
-    editor.conversion.for('downcast').elementToElement({
-      model: 'grid6x6',
-      view: (modelElement, { writer }) => {
-        const gridDiv = writer.createContainerElement('div', {
-          class: '',
-          style:
-            'display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; border: 1px dashed #ccc; min-height: 60px;',
-        });
-        return gridDiv;
-      },
-    });
-
-    editor.conversion.for('downcast').elementToElement({
-      model: 'borderedCell',
-      view: (modelElement, { writer }) => {
-        return writer.createContainerElement('div', { class: 'bordered-cell' });
-      },
-    });
-
-    // Step 4: Add the button to the toolbar
-    editor.ui.componentFactory.add('grid6x6', (locale) => {
-      const button = new ButtonView(locale);
-
-      button.set({
-        label: 'Grid 6x6',
-        icon: GridIcon6x6,
-        tooltip: true,
-      });
-
-      // Insert the grid on button click
-      button.on('execute', () => {
-        editor.model.change((writer) => {
-          // Create grid6x6 element
-          const gridElement = writer.createElement('grid6x6');
-
-          // Create two borderedCell elements as children of grid6x6
-          const cell1 = writer.createElement('borderedCell');
-          const cell2 = writer.createElement('borderedCell');
-
-          writer.append(cell1, gridElement);
-          writer.append(cell2, gridElement);
-
-          // Insert grid6x6 element into the editor at the current selection
-          editor.model.insertContent(
-            gridElement,
-            editor.model.document.selection
-          );
-        });
-      });
-
-      return button;
-    });
-  }
-}
 class Grid9x3 extends Plugin {
   static get requires() {
     return [Widget];
@@ -272,7 +154,7 @@ class Grid9x3 extends Plugin {
 
     // Đăng ký schema cho caption và đảm bảo nó là widget để có thể chỉnh sửa
     editor.model.schema.register('caption', {
-      allowIn: 'imageBlock',
+      allowIn: ['imageBlock', 'grid9x3'],
       allowContentOf: '$block',
     });
 
@@ -312,7 +194,7 @@ class Grid9x3 extends Plugin {
     });
 
     // Thêm nút grid9x3 vào toolbar
-    editor.ui.componentFactory.add('grid9x3', (locale) => {
+    editor.ui.componentFactory.add('grid9x3', (locale: any) => {
       const button = new ButtonView(locale);
       button.set({
         label: 'Insert Grid 9x3',
@@ -327,6 +209,100 @@ class Grid9x3 extends Plugin {
           const cell2 = writer.createElement('cell9x3');
           writer.append(cell1, gridElement);
           writer.append(cell2, gridElement);
+
+          editor.model.insertContent(
+            gridElement,
+            editor.model.document.selection
+          );
+        });
+      });
+
+      return button;
+    });
+  }
+}
+class Grid6x6 extends Plugin {
+  static get requires() {
+    return [Widget];
+  }
+
+  init() {
+    const editor = this.editor;
+
+    // Đăng ký schema cho grid6x6 và cell6x6
+    editor.model.schema.register('grid6x6', {
+      isObject: true,
+      allowWhere: '$block',
+    });
+
+    editor.model.schema.register('cell6x6', {
+      allowIn: 'grid6x6',
+      isBlock: true,
+      allowContentOf: '$block',
+      allowAttributes: ['src', 'alt'],
+    });
+
+    editor.model.schema.extend('cell6x6', {
+      allowContentOf: '$root', // Cho phép các phần tử cấp block bên trong
+    });
+
+    // // Đăng ký schema cho caption và đảm bảo nó là widget để có thể chỉnh sửa
+    // editor.model.schema.register('caption', {
+    //   allowIn: ['imageBlock', 'grid6x6'],
+    //   allowContentOf: '$block',
+    // });
+
+    // Upcast và downcast cho grid6x6 và cell6x6
+    editor.conversion.for('upcast').elementToElement({
+      model: 'grid6x6',
+      view: {
+        name: 'div',
+        styles:
+          'display: grid; grid-template-columns: 6fr 6fr; gap: 4px; border: 1px dashed #ccc;',
+      },
+    });
+
+    editor.conversion.for('upcast').elementToElement({
+      model: 'cell6x6',
+      view: {
+        name: 'div',
+        classes: 'bordered-cell',
+      },
+    });
+
+    editor.conversion.for('downcast').elementToElement({
+      model: 'grid6x6',
+      view: (modelElement, { writer }) => {
+        return writer.createContainerElement('div', {
+          style:
+            'display: grid; grid-template-columns: 6fr 6fr; gap: 4px; border: 1px dashed #ccc;',
+        });
+      },
+    });
+
+    editor.conversion.for('downcast').elementToElement({
+      model: 'cell6x6',
+      view: (modelElement, { writer }) => {
+        return writer.createContainerElement('div', { class: 'bordered-cell' });
+      },
+    });
+
+    // Thêm nút grid6x6 vào toolbar
+    editor.ui.componentFactory.add('grid6x6', (locale: any) => {
+      const button = new ButtonView(locale);
+      button.set({
+        label: 'Insert Grid 6x6',
+        icon: GridIcon6x6,
+        tooltip: true,
+      });
+
+      button.on('execute', () => {
+        editor.model.change((writer) => {
+          const gridElement = writer.createElement('grid6x6');
+          for (let i = 0; i < 2; i++) {
+            const cell = writer.createElement('cell6x6');
+            writer.append(cell, gridElement);
+          }
 
           editor.model.insertContent(
             gridElement,
@@ -368,7 +344,8 @@ function CustomEditor() {
             config={{
               plugins: [
                 UploadMedia,
-
+                // LayoutDropdownPlugin,
+                // GridLayoutPlugin,
                 Grid9x3,
                 Grid6x6,
                 Alignment,
@@ -425,6 +402,8 @@ function CustomEditor() {
               ],
               toolbar: {
                 items: [
+                  'layoutDropdown',
+                  'gridLayout',
                   'uploadMedia',
                   'grid',
                   'insertImage',
