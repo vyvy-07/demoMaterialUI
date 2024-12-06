@@ -1,7 +1,5 @@
-// 'use client'; // only in App Router
-
-// components/custom-editor.js
-'use client'; // only in App Router
+// 'use client';
+'use client';
 
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import {
@@ -14,6 +12,7 @@ import {
   ButtonView,
   ClassicEditor,
   CodeBlock,
+  Command,
   Essentials,
   FindAndReplace,
   FontBackgroundColor,
@@ -38,6 +37,7 @@ import {
   List,
   MediaEmbed,
   Mention,
+  // Model,
   PageBreak,
   Paragraph,
   PictureEditing,
@@ -53,6 +53,8 @@ import {
   TableColumnResize,
   TableToolbar,
   TodoList,
+  toWidget,
+  toWidgetEditable,
   Underline,
   Widget,
   WordCount,
@@ -67,9 +69,19 @@ import PopUpModel from '@/components/PopUpModel';
 import {
   FullScreenIcon,
   GridIcon,
+  GridIcon2x8x2,
+  GridIcon3x6x3,
+  GridIcon3x9,
+  GridIcon4x8,
   GridIcon6x6,
+  GridIcon8x4,
   GridIcon9x3,
+  GroupQuotes,
   IconUploadMedia,
+  LineHorizontal,
+  LineParallel,
+  Quotes,
+  QuotesWithIconSVG,
 } from '@/constant/iconCkeditor';
 import './style.css';
 class ScreenPlugin extends Plugin {
@@ -95,130 +107,37 @@ class ScreenPlugin extends Plugin {
   }
 }
 
-class Grid6x6 extends Plugin {
+class UploadMedia extends Plugin {
   static get requires() {
-    return [Widget];
+    return [Widget]; // Khai báo Widget nếu cần thiết
   }
+
   init() {
     const editor = this.editor;
+    // editor.model.schema.register('caption', {
+    //   allowIn: 'imageBlock',
+    //   allowContentOf: '$block',
+    // });
 
-    // Step 1: Define schema for the grid6x6 container
-    editor.model.schema.register('grid6x6', {
-      isObject: true,
-      allowWhere: '$block', // Can be used where block elements are allowed
-    });
-
-    editor.model.schema.register('borderedCell', {
-      allowIn: 'grid6x6',
-      isBlock: true, // Đảm bảo nó là block element
-      allowContentOf: '$block', // Allow block content inside borderedCell
-      allowAttributes: ['src', 'alt', 'controls'], // Allow media attributes
-    });
-    const widgetTypeAroundPlugin = editor.plugins.get('WidgetTypeAround');
-
-    widgetTypeAroundPlugin.clearForceDisabled('grid6x6');
-
-    // Step 2: Define upcast converter (HTML to Model)
-    editor.conversion.for('upcast').elementToElement({
-      model: 'grid6x6',
-      view: {
-        name: 'div',
-        classes: 'grid6x6',
-        styles: `display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 4px;
-  border: 1px dashed #ccc;
-  min-height: 60px;`,
-      },
-    });
-    editor.model.change((writer) => {
-      // Create an image element
-      const imageElement = writer.createElement('imageBlock', {
-        src: 'path/to/image.jpg',
-        alt: 'Description',
-      });
-      // if (imageSrc && editor) {
-      editor.model.change((writer: any) => {
-        const imageElement = writer.createElement('imageBlock', {
-          src: 'path/to/image.jpg',
-          alt: 'Description',
-        });
-        editor.model.insertContent(
-          imageElement,
-          editor.model.document.selection
-        );
-      });
-      // }
-      const borderedCell = writer.createElement('img');
-
-      writer.append(imageElement, borderedCell);
-
-      editor.model.insertContent(borderedCell, editor.model.document.selection);
-    });
-
-    editor.conversion.for('upcast').elementToElement({
-      model: 'borderedCell',
-      view: {
-        name: 'div',
-        classes: 'bordered-cell',
-      },
-    });
-
-    // Step 3: Define downcast converter (Model to HTML)
-    editor.conversion.for('downcast').elementToElement({
-      model: 'grid6x6',
-      view: (modelElement, { writer }) => {
-        const gridDiv = writer.createContainerElement('div', {
-          class: '',
-          style:
-            'display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; border: 1px dashed #ccc; min-height: 60px;',
-        });
-        return gridDiv;
-      },
-    });
-
-    editor.conversion.for('downcast').elementToElement({
-      model: 'borderedCell',
-      view: (modelElement, { writer }) => {
-        return writer.createContainerElement('div', { class: 'bordered-cell' });
-      },
-    });
-
-    // Step 4: Add the button to the toolbar
-    editor.ui.componentFactory.add('grid6x6', (locale) => {
-      const button = new ButtonView(locale);
+    editor.ui.componentFactory.add('uploadMedia', () => {
+      const button = new ButtonView();
 
       button.set({
-        label: 'Grid 6x6',
-        icon: GridIcon6x6,
-        tooltip: true,
+        label: 'Upload Media', // Tiêu đề của nút
+        icon: IconUploadMedia, // Icon nút
+        tooltip: true, // Hiển thị tooltip khi hover
       });
 
-      // Insert the grid on button click
+      // Khi người dùng nhấn vào nút
       button.on('execute', () => {
-        editor.model.change((writer) => {
-          // Create grid6x6 element
-          const gridElement = writer.createElement('grid6x6');
-
-          // Create two borderedCell elements as children of grid6x6
-          const cell1 = writer.createElement('borderedCell');
-          const cell2 = writer.createElement('borderedCell');
-
-          writer.append(cell1, gridElement);
-          writer.append(cell2, gridElement);
-
-          // Insert grid6x6 element into the editor at the current selection
-          editor.model.insertContent(
-            gridElement,
-            editor.model.document.selection
-          );
-        });
+        globalOpenPopUp();
       });
 
       return button;
     });
   }
 }
+
 class Grid9x3 extends Plugin {
   static get requires() {
     return [Widget];
@@ -227,7 +146,7 @@ class Grid9x3 extends Plugin {
   init() {
     const editor = this.editor;
 
-    // Step 1: Define schema for grid9x3 and cell9x3
+    // Đăng ký schema cho grid9x3 và cell9x3
     editor.model.schema.register('grid9x3', {
       isObject: true,
       allowWhere: '$block',
@@ -240,7 +159,26 @@ class Grid9x3 extends Plugin {
       allowAttributes: ['src', 'alt'],
     });
 
-    // Step 2: Define upcast converter (HTML to Model)
+    editor.model.schema.extend('cell9x3', {
+      allowContentOf: '$root', // Cho phép các phần tử cấp block bên trong
+    });
+
+    // Đăng ký schema cho caption và đảm bảo nó là widget để có thể chỉnh sửa
+    editor.model.schema.register('caption', {
+      allowIn: [
+        'imageBlock',
+        'grid9x3',
+        'grid6x6',
+        'grid3x6x3',
+        'grid2x8x2',
+        'grid3x9',
+        'grid4x8',
+        'grid8x4',
+      ],
+      allowContentOf: '$block',
+    });
+
+    // Upcast và downcast cho grid9x3 và cell9x3
     editor.conversion.for('upcast').elementToElement({
       model: 'grid9x3',
       view: {
@@ -258,7 +196,6 @@ class Grid9x3 extends Plugin {
       },
     });
 
-    // Step 3: Define downcast converter (Model to HTML)
     editor.conversion.for('downcast').elementToElement({
       model: 'grid9x3',
       view: (modelElement, { writer }) => {
@@ -276,8 +213,8 @@ class Grid9x3 extends Plugin {
       },
     });
 
-    // Step 4: Add grid9x3 button to toolbar
-    editor.ui.componentFactory.add('grid9x3', (locale) => {
+    // Thêm nút grid9x3 vào toolbar
+    editor.ui.componentFactory.add('grid9x3', (locale: any) => {
       const button = new ButtonView(locale);
       button.set({
         label: 'Insert Grid 9x3',
@@ -304,53 +241,862 @@ class Grid9x3 extends Plugin {
     });
   }
 }
-
-class UploadMedia extends Plugin {
+class Grid3x9 extends Plugin {
   static get requires() {
-    return [Widget]; // Khai báo Widget nếu cần thiết
+    return [Widget];
   }
 
   init() {
     const editor = this.editor;
 
-    editor.ui.componentFactory.add('uploadMedia', () => {
-      const button = new ButtonView();
+    // Đăng ký schema cho grid3x9 và cell3x9
+    editor.model.schema.register('grid3x9', {
+      isObject: true,
+      allowWhere: '$block',
+    });
 
+    editor.model.schema.register('cell3x9', {
+      allowIn: 'grid3x9',
+      isBlock: true,
+      allowContentOf: '$block',
+      allowAttributes: ['src', 'alt'],
+    });
+
+    editor.model.schema.extend('cell3x9', {
+      allowContentOf: '$root', // Cho phép các phần tử cấp block bên trong
+    });
+
+    // Upcast và downcast cho grid3x9 và cell3x9
+    editor.conversion.for('upcast').elementToElement({
+      model: 'grid3x9',
+      view: {
+        name: 'div',
+        styles:
+          'display: grid; grid-template-columns: 3fr 9fr; gap: 4px; border: 1px dashed #ccc;',
+      },
+    });
+
+    editor.conversion.for('upcast').elementToElement({
+      model: 'cell3x9',
+      view: {
+        name: 'div',
+        classes: 'bordered-cell',
+      },
+    });
+
+    editor.conversion.for('downcast').elementToElement({
+      model: 'grid3x9',
+      view: (modelElement, { writer }) => {
+        return writer.createContainerElement('div', {
+          style:
+            'display: grid; grid-template-columns: 3fr 9fr; gap: 4px; border: 1px dashed #ccc;',
+        });
+      },
+    });
+
+    editor.conversion.for('downcast').elementToElement({
+      model: 'cell3x9',
+      view: (modelElement, { writer }) => {
+        return writer.createContainerElement('div', { class: 'bordered-cell' });
+      },
+    });
+
+    // Thêm nút grid3x9 vào toolbar
+    editor.ui.componentFactory.add('grid3x9', (locale) => {
+      const button = new ButtonView(locale);
       button.set({
-        label: 'Upload Media', // Tiêu đề của nút
-        icon: IconUploadMedia, // Icon nút
-        tooltip: true, // Hiển thị tooltip khi hover
+        label: 'Insert Grid 3x9',
+        icon: GridIcon3x9, // Thay biểu tượng nếu cần
+        tooltip: true,
       });
 
-      // Khi người dùng nhấn vào nút
       button.on('execute', () => {
-        globalOpenPopUp();
+        editor.model.change((writer) => {
+          const gridElement = writer.createElement('grid3x9');
+          for (let i = 0; i < 2; i++) {
+            // Tạo 2 ô cho lưới 3x9
+            const cell = writer.createElement('cell3x9');
+            writer.append(cell, gridElement);
+          }
+
+          editor.model.insertContent(
+            gridElement,
+            editor.model.document.selection
+          );
+        });
       });
 
       return button;
     });
   }
+}
 
-  // Hàm chèn ảnh vào vị trí con trỏ hiện tại
-  insertImageAtCursor(imageUrl: string) {
+class Grid6x6 extends Plugin {
+  static get requires() {
+    return [Widget];
+  }
+
+  init() {
     const editor = this.editor;
 
-    // Lấy vị trí con trỏ hiện tại
-    const selection = editor.model.document.selection;
+    // Đăng ký schema cho grid6x6 và cell6x6
+    editor.model.schema.register('grid6x6', {
+      isObject: true,
+      allowWhere: '$block',
+    });
 
-    // Đảm bảo có một vị trí selection hợp lệ
-    if (selection.rangeCount > 0) {
-      // Tạo phần tử ảnh mới
-      const imageElement = editor.model.change((writer) => {
-        return writer.createElement('imageBlock', {
-          src: imageUrl,
-          alt: 'Uploaded Image',
+    editor.model.schema.register('cell6x6', {
+      allowIn: 'grid6x6',
+      isBlock: true,
+      allowContentOf: '$block',
+      allowAttributes: ['src', 'alt'],
+    });
+
+    editor.model.schema.extend('cell6x6', {
+      allowContentOf: '$root', // Cho phép các phần tử cấp block bên trong
+    });
+
+    // // Đăng ký schema cho caption và đảm bảo nó là widget để có thể chỉnh sửa
+    // editor.model.schema.register('caption', {
+    //   allowIn: ['imageBlock', 'grid6x6'],
+    //   allowContentOf: '$block',
+    // });
+
+    // Upcast và downcast cho grid6x6 và cell6x6
+    editor.conversion.for('upcast').elementToElement({
+      model: 'grid6x6',
+      view: {
+        name: 'div',
+        styles:
+          'display: grid; grid-template-columns: 6fr 6fr; gap: 4px; border: 1px dashed #ccc;',
+      },
+    });
+
+    editor.conversion.for('upcast').elementToElement({
+      model: 'cell6x6',
+      view: {
+        name: 'div',
+        classes: 'bordered-cell',
+      },
+    });
+
+    editor.conversion.for('downcast').elementToElement({
+      model: 'grid6x6',
+      view: (modelElement, { writer }) => {
+        return writer.createContainerElement('div', {
+          style:
+            'display: grid; grid-template-columns: 6fr 6fr; gap: 4px; border: 1px dashed #ccc;',
+        });
+      },
+    });
+
+    editor.conversion.for('downcast').elementToElement({
+      model: 'cell6x6',
+      view: (modelElement, { writer }) => {
+        return writer.createContainerElement('div', { class: 'bordered-cell' });
+      },
+    });
+
+    // Thêm nút grid6x6 vào toolbar
+    editor.ui.componentFactory.add('grid6x6', (locale: any) => {
+      const button = new ButtonView(locale);
+      button.set({
+        label: 'Insert Grid 6x6',
+        icon: GridIcon6x6,
+        tooltip: true,
+      });
+
+      button.on('execute', () => {
+        editor.model.change((writer) => {
+          const gridElement = writer.createElement('grid6x6');
+          for (let i = 0; i < 2; i++) {
+            const cell = writer.createElement('cell6x6');
+            writer.append(cell, gridElement);
+          }
+
+          editor.model.insertContent(
+            gridElement,
+            editor.model.document.selection
+          );
         });
       });
 
-      // Chèn phần tử hình ảnh vào vị trí hiện tại của con trỏ
-      editor.model.insertContent(imageElement, selection);
-    }
+      return button;
+    });
+  }
+}
+class Grid3x6x3 extends Plugin {
+  static get requires() {
+    return [Widget];
+  }
+
+  init() {
+    const editor = this.editor;
+
+    // Đăng ký schema cho Grid3x6x3 và Cell3x6x3
+    editor.model.schema.register('grid3x6x3', {
+      isObject: true,
+      allowWhere: '$block',
+    });
+
+    editor.model.schema.register('cell3x6x3', {
+      allowIn: 'grid3x6x3',
+      isBlock: true,
+      allowContentOf: '$block',
+      allowAttributes: ['src', 'alt'],
+    });
+
+    editor.model.schema.extend('cell3x6x3', {
+      allowContentOf: '$root', // Cho phép các phần tử cấp block bên trong
+    });
+
+    // Upcast và downcast cho Grid3x6x3 và Cell3x6x3
+    editor.conversion.for('upcast').elementToElement({
+      model: 'grid3x6x3',
+      view: {
+        name: 'div',
+        styles:
+          'display: grid; grid-template-columns: 3fr 6fr 3fr; gap: 4px; border: 1px dashed #ccc;',
+      },
+    });
+
+    editor.conversion.for('upcast').elementToElement({
+      model: 'cell3x6x3',
+      view: {
+        name: 'div',
+        classes: 'bordered-cell',
+      },
+    });
+
+    editor.conversion.for('downcast').elementToElement({
+      model: 'grid3x6x3',
+      view: (modelElement, { writer }) => {
+        return writer.createContainerElement('div', {
+          style:
+            'display: grid; grid-template-columns: 3fr 6fr 3fr; gap: 4px; border: 1px dashed #ccc;',
+        });
+      },
+    });
+
+    editor.conversion.for('downcast').elementToElement({
+      model: 'cell3x6x3',
+      view: (modelElement, { writer }) => {
+        return writer.createContainerElement('div', { class: 'bordered-cell' });
+      },
+    });
+
+    // Thêm nút Grid3x6x3 vào toolbar
+    editor.ui.componentFactory.add('grid3x6x3', (locale) => {
+      const button = new ButtonView(locale);
+      button.set({
+        label: 'Insert Grid 3x6x3',
+        icon: GridIcon3x6x3,
+        withText: false,
+        tooltip: true,
+      });
+
+      button.on('execute', () => {
+        editor.model.change((writer) => {
+          const gridElement = writer.createElement('grid3x6x3');
+          // Thêm 3 cell tương ứng với cấu hình 3x6x3
+          for (let i = 0; i < 3; i++) {
+            const cell = writer.createElement('cell3x6x3');
+            writer.append(cell, gridElement);
+          }
+
+          editor.model.insertContent(
+            gridElement,
+            editor.model.document.selection
+          );
+        });
+      });
+
+      return button;
+    });
+  }
+}
+class Grid2x8x2 extends Plugin {
+  static get requires() {
+    return [Widget];
+  }
+
+  init() {
+    const editor = this.editor;
+
+    // Đăng ký schema cho Grid2x8x2 và Cell2x8x2
+    editor.model.schema.register('grid2x8x2', {
+      isObject: true,
+      allowWhere: '$block',
+    });
+
+    editor.model.schema.register('cell2x8x2', {
+      allowIn: 'grid2x8x2',
+      isBlock: true,
+      allowContentOf: '$block',
+      allowAttributes: ['src', 'alt'],
+    });
+
+    editor.model.schema.extend('cell2x8x2', {
+      allowContentOf: '$root', // Cho phép các phần tử cấp block bên trong
+    });
+
+    // Upcast và downcast cho Grid2x8x2 và Cell2x8x2
+    editor.conversion.for('upcast').elementToElement({
+      model: 'grid2x8x2',
+      view: {
+        name: 'div',
+        styles:
+          'display: grid; grid-template-columns: 2fr 8fr 2fr; gap: 4px; border: 1px dashed #ccc;',
+      },
+    });
+
+    editor.conversion.for('upcast').elementToElement({
+      model: 'cell2x8x2',
+      view: {
+        name: 'div',
+        classes: 'bordered-cell',
+      },
+    });
+
+    editor.conversion.for('downcast').elementToElement({
+      model: 'grid2x8x2',
+      view: (modelElement, { writer }) => {
+        return writer.createContainerElement('div', {
+          style:
+            'display: grid; grid-template-columns: 2fr 8fr 2fr; gap: 4px; border: 1px dashed #ccc;',
+        });
+      },
+    });
+
+    editor.conversion.for('downcast').elementToElement({
+      model: 'cell2x8x2',
+      view: (modelElement, { writer }) => {
+        return writer.createContainerElement('div', { class: 'bordered-cell' });
+      },
+    });
+
+    // Thêm nút Grid2x8x2 vào toolbar
+    editor.ui.componentFactory.add('grid2x8x2', (locale) => {
+      const button = new ButtonView(locale);
+      button.set({
+        label: 'Insert Grid 2x8x2',
+        icon: GridIcon2x8x2,
+        tooltip: true,
+      });
+
+      button.on('execute', () => {
+        editor.model.change((writer) => {
+          const gridElement = writer.createElement('grid2x8x2');
+          // Thêm 3 cell tương ứng với cấu hình 2x8x2
+          for (let i = 0; i < 3; i++) {
+            const cell = writer.createElement('cell2x8x2');
+            writer.append(cell, gridElement);
+          }
+
+          editor.model.insertContent(
+            gridElement,
+            editor.model.document.selection
+          );
+        });
+      });
+
+      return button;
+    });
+  }
+}
+class Grid8x4 extends Plugin {
+  static get requires() {
+    return [Widget];
+  }
+
+  init() {
+    const editor = this.editor;
+
+    // Đăng ký schema cho grid8x4 và cell8x4
+    editor.model.schema.register('grid8x4', {
+      isObject: true,
+      allowWhere: '$block',
+    });
+
+    editor.model.schema.register('cell8x4', {
+      allowIn: 'grid8x4',
+      isBlock: true,
+      allowContentOf: '$block',
+      allowAttributes: ['src', 'alt'],
+    });
+
+    editor.model.schema.extend('cell8x4', {
+      allowContentOf: '$root', // Cho phép các phần tử cấp block bên trong
+    });
+
+    // Upcast và downcast cho grid8x4 và cell8x4
+    editor.conversion.for('upcast').elementToElement({
+      model: 'grid8x4',
+      view: {
+        name: 'div',
+        styles:
+          'display: grid; grid-template-columns: 8fr 4fr; gap: 4px; border: 1px dashed #ccc;',
+      },
+    });
+
+    editor.conversion.for('upcast').elementToElement({
+      model: 'cell8x4',
+      view: {
+        name: 'div',
+        classes: 'bordered-cell',
+      },
+    });
+
+    editor.conversion.for('downcast').elementToElement({
+      model: 'grid8x4',
+      view: (modelElement, { writer }) => {
+        return writer.createContainerElement('div', {
+          style:
+            'display: grid; grid-template-columns: 8fr 4fr; gap: 4px; border: 1px dashed #ccc;',
+        });
+      },
+    });
+
+    editor.conversion.for('downcast').elementToElement({
+      model: 'cell8x4',
+      view: (modelElement, { writer }) => {
+        return writer.createContainerElement('div', { class: 'bordered-cell' });
+      },
+    });
+
+    // Thêm nút grid8x4 vào toolbar
+    editor.ui.componentFactory.add('grid8x4', (locale) => {
+      const button = new ButtonView(locale);
+      button.set({
+        label: 'Insert Grid 8x4',
+        icon: GridIcon8x4,
+        tooltip: true,
+      });
+
+      button.on('execute', () => {
+        editor.model.change((writer) => {
+          const gridElement = writer.createElement('grid8x4');
+          for (let i = 0; i < 2; i++) {
+            // Chỉ tạo 2 ô cho 2 cột
+            const cell = writer.createElement('cell8x4');
+            writer.append(cell, gridElement);
+          }
+
+          editor.model.insertContent(
+            gridElement,
+            editor.model.document.selection
+          );
+        });
+      });
+
+      return button;
+    });
+  }
+}
+class Grid4x8 extends Plugin {
+  static get requires() {
+    return [Widget];
+  }
+
+  init() {
+    const editor = this.editor;
+
+    // Đăng ký schema cho grid4x8 và cell4x8
+    editor.model.schema.register('grid4x8', {
+      isObject: true,
+      allowWhere: '$block',
+    });
+
+    editor.model.schema.register('cell4x8', {
+      allowIn: 'grid4x8',
+      isBlock: true,
+      allowContentOf: '$block',
+      allowAttributes: ['src', 'alt'],
+    });
+
+    editor.model.schema.extend('cell4x8', {
+      allowContentOf: '$root', // Cho phép các phần tử cấp block bên trong
+    });
+
+    // Upcast và downcast cho grid4x8 và cell4x8
+    editor.conversion.for('upcast').elementToElement({
+      model: 'grid4x8',
+      view: {
+        name: 'div',
+        styles:
+          'display: grid; grid-template-columns: 4fr 8fr; grid-template-rows: 1fr; gap: 4px; border: 1px dashed #ccc;',
+      },
+    });
+
+    editor.conversion.for('upcast').elementToElement({
+      model: 'cell4x8',
+      view: {
+        name: 'div',
+        classes: 'bordered-cell',
+      },
+    });
+
+    editor.conversion.for('downcast').elementToElement({
+      model: 'grid4x8',
+      view: (modelElement, { writer }) => {
+        return writer.createContainerElement('div', {
+          style:
+            'display: grid; grid-template-columns: 4fr 8fr; grid-template-rows: 1fr; gap: 4px; border: 1px dashed #ccc;',
+        });
+      },
+    });
+
+    editor.conversion.for('downcast').elementToElement({
+      model: 'cell4x8',
+      view: (modelElement, { writer }) => {
+        return writer.createContainerElement('div', { class: 'bordered-cell' });
+      },
+    });
+
+    // Thêm nút grid4x8 vào toolbar
+    editor.ui.componentFactory.add('grid4x8', (locale) => {
+      const button = new ButtonView(locale);
+      button.set({
+        label: 'Insert Grid 4x8',
+        icon: GridIcon4x8,
+        tooltip: true,
+      });
+
+      button.on('execute', () => {
+        editor.model.change((writer) => {
+          const gridElement = writer.createElement('grid4x8');
+          // Chỉ tạo 2 ô
+          for (let i = 0; i < 2; i++) {
+            const cell = writer.createElement('cell4x8');
+            writer.append(cell, gridElement);
+          }
+
+          editor.model.insertContent(
+            gridElement,
+            editor.model.document.selection
+          );
+        });
+      });
+
+      return button;
+    });
+  }
+}
+
+class BlockQuoteBorder extends Plugin {
+  init() {
+    const editor: any = this.editor;
+
+    this.registerSchema();
+    this.addDowncastConversion();
+    this.addUpcastConversion();
+    this.addInsertQuoteLinesCommand();
+  }
+
+  private registerSchema() {
+    const editor: any = this.editor;
+
+    editor.model.schema.register('customQuoteLines', {
+      inheritAllFrom: '$block',
+      allowContentOf: '$root',
+    });
+  }
+
+  private addDowncastConversion() {
+    const editor: any = this.editor;
+
+    editor.conversion.for('downcast').elementToElement({
+      model: 'customQuoteLines',
+      view: (modelElement: any, { writer }: { writer: any }) => {
+        return writer.createContainerElement('blockquote', {
+          class: 'quote-lines',
+        });
+      },
+    });
+  }
+
+  private addUpcastConversion() {
+    const editor: any = this.editor;
+
+    editor.conversion.for('upcast').elementToElement({
+      view: {
+        name: 'blockquote',
+        classes: 'quote-lines',
+      },
+      model: 'customQuoteLines',
+    });
+  }
+
+  private addInsertQuoteLinesCommand() {
+    const editor: any = this.editor;
+
+    editor.commands.add(
+      'insertQuoteLines',
+      new InsertQuoteLinesCommand(editor)
+    );
+    editor.ui.componentFactory.add('insertQuoteLines', (locale: any) => {
+      const buttonView = new ButtonView(locale);
+      buttonView.set({
+        label: 'insertQuoteLines',
+        icon: LineParallel,
+        tooltip: true,
+      });
+
+      buttonView.on('execute', () => editor.execute('insertQuoteLines'));
+
+      return buttonView;
+    });
+  }
+}
+
+class InsertQuoteLinesCommand extends Command {
+  execute() {
+    const editor = this.editor;
+
+    editor.model.change((writer) => {
+      this.removeNestedBlockquotes(writer);
+      this.insertCustomQuoteLines(writer, editor);
+    });
+  }
+
+  private removeNestedBlockquotes(writer: any) {
+    const document: any = this.editor.model.document;
+    const blocks = Array.from(document.getRoot().getChildren());
+
+    blocks.forEach((block: any) => {
+      if (block.is('element', 'blockquote')) {
+        const nestedBlockquote: any = Array.from(block.getChildren()).find(
+          (child: any) => child.is('element', 'blockquote')
+        );
+
+        if (nestedBlockquote) {
+          writer.remove(nestedBlockquote);
+        }
+      }
+    });
+  }
+
+  private insertCustomQuoteLines(writer: any, editor: any) {
+    const quote = writer.createElement('customQuoteLines');
+    const paragraph = writer.createElement('paragraph');
+    writer.append(paragraph, quote);
+
+    editor.model.insertContent(quote);
+    writer.setSelection(paragraph, 'in');
+  }
+
+  refresh() {
+    this.isEnabled = true;
+  }
+}
+
+class BlockHorizontal extends Plugin {
+  init() {
+    const editor: any = this.editor;
+
+    this.registerSchema();
+    this.addDowncastConversion();
+    this.addUpcastConversion();
+    this.addInsertCustomBlockCommand();
+  }
+
+  private registerSchema() {
+    const editor: any = this.editor;
+
+    editor.model.schema.register('customBlockQuote', {
+      inheritAllFrom: '$block',
+      allowContentOf: '$root',
+    });
+  }
+
+  private addDowncastConversion() {
+    const editor: any = this.editor;
+
+    editor.conversion.for('downcast').elementToElement({
+      model: 'customBlockQuote',
+      view: (modelElement: any, { writer }: { writer: any }) => {
+        return writer.createContainerElement('blockquote', {
+          class: 'custom-quote-button',
+        });
+      },
+    });
+  }
+
+  private addUpcastConversion() {
+    const editor: any = this.editor;
+
+    editor.conversion.for('upcast').elementToElement({
+      view: {
+        name: 'blockquote',
+        classes: 'custom-quote-button',
+      },
+      model: 'customBlockQuote',
+    });
+  }
+
+  private addInsertCustomBlockCommand() {
+    const editor: any = this.editor;
+
+    editor.commands.add('insertCustomBlock', new InsertBlockHorizontal(editor));
+    editor.ui.componentFactory.add('insertCustomBlock', (locale: any) => {
+      const buttonView = new ButtonView(locale);
+      buttonView.set({
+        label: 'Insert Custom Block',
+        icon: LineHorizontal,
+        tooltip: true,
+      });
+
+      buttonView.on('execute', () => editor.execute('insertCustomBlock'));
+
+      return buttonView;
+    });
+  }
+}
+
+class InsertBlockHorizontal extends Command {
+  execute() {
+    const editor = this.editor;
+
+    editor.model.change((writer) => {
+      this.removeNestedBlockquotes(writer);
+      this.insertCustomQuoteLines(writer, editor);
+    });
+  }
+
+  private removeNestedBlockquotes(writer: any) {
+    const document: any = this.editor.model.document;
+    const blocks = Array.from(document.getRoot().getChildren());
+
+    blocks.forEach((block: any) => {
+      if (block.is('element', 'blockquote')) {
+        const nestedBlockquote: any = Array.from(block.getChildren()).find(
+          (child: any) => child.is('element', 'blockquote')
+        );
+
+        if (nestedBlockquote) {
+          writer.remove(nestedBlockquote);
+        }
+      }
+    });
+  }
+
+  private insertCustomQuoteLines(writer: any, editor: any) {
+    const quote = writer.createElement('customBlockQuote');
+    const paragraph = writer.createElement('paragraph');
+    writer.append(paragraph, quote);
+
+    editor.model.insertContent(quote);
+    writer.setSelection(paragraph, 'in');
+  }
+
+  refresh() {
+    this.isEnabled = true;
+  }
+}
+class QuotesWithIcon extends Plugin {
+  init() {
+    const editor: any = this.editor;
+
+    this.registerSchema();
+    this.addDowncastConversion();
+    this.addUpcastConversion();
+    this.addInsertCustomBlockCommand();
+  }
+
+  private registerSchema() {
+    const editor: any = this.editor;
+
+    editor.model.schema.register('quotesWithIcon', {
+      inheritAllFrom: '$block',
+      allowContentOf: '$root',
+    });
+  }
+
+  private addDowncastConversion() {
+    const editor: any = this.editor;
+
+    editor.conversion.for('downcast').elementToElement({
+      model: 'quotesWithIcon',
+      view: (modelElement: any, { writer }: { writer: any }) => {
+        return writer.createContainerElement('blockquote', {
+          class: 'quotes-with-icon-button',
+        });
+      },
+    });
+  }
+
+  private addUpcastConversion() {
+    const editor: any = this.editor;
+
+    editor.conversion.for('upcast').elementToElement({
+      view: {
+        name: 'blockquote',
+        classes: 'quotes-with-icon-button',
+      },
+      model: 'quotesWithIcon',
+    });
+  }
+
+  private addInsertCustomBlockCommand() {
+    const editor: any = this.editor;
+
+    editor.commands.add(
+      'insertQuotesWithIcon',
+      new InsertQuotesWithIcon(editor)
+    );
+    editor.ui.componentFactory.add('insertQuotesWithIcon', (locale: any) => {
+      const buttonView = new ButtonView(locale);
+      buttonView.set({
+        label: 'Insert Quote with Icon',
+        icon: QuotesWithIconSVG, // Replace with your icon if needed
+        tooltip: true,
+      });
+
+      buttonView.on('execute', () => editor.execute('insertQuotesWithIcon'));
+
+      return buttonView;
+    });
+  }
+}
+
+class InsertQuotesWithIcon extends Command {
+  execute() {
+    const editor = this.editor;
+
+    editor.model.change((writer) => {
+      this.removeNestedBlockquotes(writer);
+      this.insertCustomQuoteLines(writer, editor);
+    });
+  }
+
+  private removeNestedBlockquotes(writer: any) {
+    const document: any = this.editor.model.document;
+    const blocks = Array.from(document.getRoot().getChildren());
+
+    blocks.forEach((block: any) => {
+      if (block.is('element', 'blockquote')) {
+        const nestedBlockquote: any = Array.from(block.getChildren()).find(
+          (child: any) => child.is('element', 'blockquote')
+        );
+
+        if (nestedBlockquote) {
+          writer.remove(nestedBlockquote);
+        }
+      }
+    });
+  }
+
+  private insertCustomQuoteLines(writer: any, editor: any) {
+    const quote = writer.createElement('quotesWithIcon');
+    const paragraph = writer.createElement('paragraph');
+    writer.append(paragraph, quote);
+
+    editor.model.insertContent(quote);
+    writer.setSelection(paragraph, 'in');
+  }
+
+  refresh() {
+    this.isEnabled = true;
   }
 }
 
@@ -381,7 +1127,15 @@ function CustomEditor() {
             editor={ClassicEditor}
             config={{
               plugins: [
+                QuotesWithIcon,
+                BlockHorizontal,
+                BlockQuoteBorder,
+                Grid3x9,
+                Grid4x8,
+                Grid8x4,
                 UploadMedia,
+                Grid3x6x3,
+                Grid2x8x2,
                 Grid9x3,
                 Grid6x6,
                 Alignment,
@@ -440,7 +1194,6 @@ function CustomEditor() {
                 items: [
                   'uploadMedia',
                   'grid',
-
                   'removeFormat',
                   '|',
                   'undo',
@@ -457,7 +1210,6 @@ function CustomEditor() {
                   'bold',
                   'italic',
                   'underline',
-                  'blockQuote',
                   'alignment',
                   'strikethrough',
                   '|',
@@ -467,21 +1219,32 @@ function CustomEditor() {
                   'bulletedList',
                   'numberedList',
                   '|',
-
                   'mediaEmbed',
                   'insertTable',
+
+                  {
+                    label: 'Quotes Group',
+                    icon: GroupQuotes,
+                    items: [
+                      'blockQuote',
+                      'insertQuoteLines',
+                      'insertCustomBlock',
+                      'insertQuotesWithIcon',
+                    ],
+                  },
 
                   {
                     label: 'Grid Layout',
                     icon: GridIcon,
                     items: [
-                      'grid12',
                       'grid6x6',
                       'grid9x3',
-                      'insertGrid',
-                      'grid3x3',
-                      'grid2x1',
-                      'grid4x1',
+                      'grid3x9',
+                      'grid4x4x4',
+                      'grid2x8x2',
+                      'grid3x6x3',
+                      'grid8x4',
+                      'grid4x8',
                     ],
                   },
                   {
@@ -503,10 +1266,7 @@ function CustomEditor() {
               },
 
               image: {
-                styles: {},
                 toolbar: [
-                  // 'toggleImageCaption',
-                  // 'imageTextAlternative',
                   'ckboxImageEdit',
                   'imageCaption',
                   'autoImage',
@@ -515,18 +1275,12 @@ function CustomEditor() {
                   'imageStyle:inline',
                   'imageStyle:side',
                   'imageStyle:alignLeft',
-                  // 'imageStyle:alignRight',
-                  // 'imageStyle:alignBlockLeft',
-                  // 'imageStyle:alignBlockRight',
                   'imageStyle:alignCenter',
 
                   '|',
                   'toggleImageCaption',
                   'imageTextAlternative',
                 ],
-                insert: {
-                  integrations: ['upload', 'assetManager', 'url'],
-                },
               },
               wordCount: {
                 onUpdate: (stats) => {
@@ -584,20 +1338,12 @@ function CustomEditor() {
                 contentToolbar: ['tableColumn', 'tableRow', 'mergeTableCells'],
               },
             }}
-            data="<div>Hello from the first editor working with the context!</div>
-          "
+            data="<p>Hello from the first editor working with the context!</p>"
             contextItemMetadata={{
               name: 'editor1',
               yourAdditionalData: 2,
             }}
-            // onReady={(editor) => {
-            //   console.log('Editor 1 is ready to use!', editor);
-            // }}
-            // onChange={(event, editor) => {
-            //   setEditorData(editor.getData());
-            // }}
             onReady={(editor: any) => {
-              // Gán CKEditor instance vào editorRef khi CKEditor sẵn sàng
               editorRef.current = editor;
             }}
           />

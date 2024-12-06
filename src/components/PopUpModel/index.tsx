@@ -7,42 +7,91 @@ const PopUpModel = ({ editor }: { editor: any }) => {
   const chooseImage = (src: string) => {
     setImageSrc(src);
   };
-  console.log('imageSrc :>> ', imageSrc);
-
   const closePopUp = () => {
     if (imageSrc && editor) {
-      const selection = editor.model.document.selection;
-      const position = selection.getFirstPosition();
-
-      // Kiểm tra xem con trỏ chuột có đang trong phần tử p hay không
-      const targetP = position?.findAncestor('div.bordered-cell'); // Tìm p có class "bordered-cell"
-
       editor.model.change((writer: any) => {
-        if (targetP) {
-          // Nếu con trỏ đang trong p, thay thế nội dung p bằng ảnh
-          const imageElement = writer.createElement('imageBlock', {
-            src: imageSrc,
-            alt: 'Uploaded Image',
+        // Đăng ký schema cho caption nếu chưa đăng ký
+        if (!editor.model.schema.isRegistered('caption')) {
+          editor.model.schema.register('caption', {
+            allowIn: [
+              'imageBlock',
+              'grid9x3',
+              'grid3x9',
+              'grid6x6',
+              'grid3x6x3',
+              'Grid2x8x2',
+              'grid4x8',
+              'grid8x4',
+            ],
+            allowContentOf: '$block',
           });
-          // Tạo caption cho ảnh
-          const captionElement = writer.createElement('caption', {
-            contenteditable: 'true',
-          });
-          writer.insertText('Your Caption Here', captionElement);
-          // Chèn ảnh vào vị trí con trỏ trong p
-          // writer.remove(targetP); // Xóa nội dung hiện tại của p
-          writer.append(imageElement, targetP.getParent()); // Thêm ảnh vào phần tử cha của p (div)
-        } else {
-          // Nếu không trong p, chèn ảnh vào vị trí con trỏ hiện tại
-          const imageElement = writer.createElement('imageBlock', {
-            src: imageSrc,
-          });
-          writer.insert(imageElement, position); // Chèn vào vị trí con trỏ
         }
+
+        // Đảm bảo imageBlock cho phép src và alt
+        editor.model.schema.extend('imageBlock', {
+          allowAttributes: ['alt', 'src'],
+        });
+
+        const selection = editor.model.document.selection;
+        let position = selection.getFirstPosition();
+
+        // Kiểm tra nếu con trỏ nằm trong thẻ <p>
+        const parentElement = position.parent;
+        if (parentElement.is('element', 'paragraph')) {
+          position = writer.createPositionBefore(parentElement); // Di chuyển con trỏ ra ngoài
+          writer.remove(parentElement); // Xóa thẻ <p>
+        }
+
+        // Tạo phần tử hình ảnh
+        const imageElement = writer.createElement('imageBlock', {
+          src: imageSrc,
+          alt: 'Ảnh đã tải lên',
+        });
+
+        // Chèn ảnh vào vị trí mới
+        writer.insert(imageElement, position);
+
+        // Tự động thêm caption nếu cần
+        const captionElement = writer.createElement('caption');
+        writer.append(captionElement, imageElement); // Gắn caption vào hình ảnh
+
+        // Đảm bảo caption có thể chỉnh sửa
+        editor.conversion.for('downcast').elementToElement({
+          model: 'caption',
+          view: (modelElement: any, { writer }: { writer: any }) => {
+            return writer.createEditableElement('figcaption', {
+              class: 'ck-editor__editable ck-editor__nested-editable',
+              'data-placeholder': 'Caption cho ảnh ở đây',
+            });
+          },
+        });
       });
+      // Lắng nghe sự kiện thay đổi để kiểm tra nội dung của caption
+      editor.model.document.on('change:data', () => {
+        editor.model.change((writer: any) => {
+          // Lấy tất cả các thẻ `caption` trong tài liệu
+          const captions = Array.from(
+            editor.model.document.getRoot().getChildren()
+          ).filter((element: any) => element.name === 'caption');
+
+          captions.forEach((caption: any) => {
+            // Lấy nội dung văn bản trong `caption`
+            const content = Array.from(caption.getChildren())
+              .map((child: any) => child.data || '') // Lấy dữ liệu văn bản
+              .join('')
+              .replace(/[\u00A0\s]/g, ''); // Xóa tất cả khoảng trắng và `&nbsp;`
+
+            // Kiểm tra nếu nội dung hoàn toàn trống
+            if (!content) {
+              writer.remove(caption); // Xóa thẻ `caption` nếu trống
+            }
+          });
+        });
+      });
+      setIsOpen(false); // Đóng pop-up
     }
-    setIsOpen(false);
   };
+
   return (
     <div>
       {isOpen && (
@@ -52,13 +101,13 @@ const PopUpModel = ({ editor }: { editor: any }) => {
               <h1 className="text-[24px] ">MEDIA</h1>
             </div>
             <div
-              className="w-[30px] h-[30px] cursor-pointer "
+              className="w-[90px] bg-slate-300  rounded-sm p-3 flex items-center h-[30px] cursor-pointer "
               onClick={closePopUp}
             >
               chèn
               <img
                 className="w-full h-full object-cover"
-                src="../img.svg"
+                src="/close.svg"
                 alt=""
               />
             </div>

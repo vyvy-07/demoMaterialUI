@@ -24,3 +24,6 @@ body {
     text-wrap: balance;
   }
 }
+.ck.ck-icon.ck-icon_inherit-color *:not([fill]){
+  
+}

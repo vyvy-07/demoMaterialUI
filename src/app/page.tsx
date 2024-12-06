@@ -11,6 +11,7 @@ import { styled } from '@mui/material/styles';
 import * as React from 'react';
 import axios from 'axios';
 import { Button } from '@mui/material';
+import { GridIcon3x6x3 } from '@/constant/iconCkeditor';
 const Item = styled(Paper)(({ theme }) => ({
   // color: 'secondary',
 }));
@@ -51,34 +52,36 @@ export default function Dashboard() {
   // };
 
   return (
-    <Box sx={{ flexGrow: 1, width: '100%' }}>
-      <Button>post</Button>
-      <Grid container spacing={2}>
-        <Grid item xs={6} md={8}>
-          <Item>
+    <>
+      <Box sx={{ flexGrow: 1, width: '100%' }}>
+        <Button>post</Button>
+        <Grid container spacing={2}>
+          <Grid item xs={6} md={8}>
+            <Item>
+              <CardLarge />
+            </Item>
+          </Grid>
+          <Grid item xs={6} md={4}>
             <CardLarge />
-          </Item>
+          </Grid>
+          <Grid item xs={6} md={4}>
+            <Item>
+              <BasicPie />
+            </Item>
+          </Grid>
+          <Grid item xs={6} md={8}>
+            <Item>
+              <SimpleBarChart />
+            </Item>
+          </Grid>
+          <Grid xs={6} md={8}>
+            <Item></Item>
+          </Grid>
+          <Grid xs={6} md={4}>
+            <Item></Item>
+          </Grid>
         </Grid>
-        <Grid item xs={6} md={4}>
-          <CardLarge />
-        </Grid>
-        <Grid item xs={6} md={4}>
-          <Item>
-            <BasicPie />
-          </Item>
-        </Grid>
-        <Grid item xs={6} md={8}>
-          <Item>
-            <SimpleBarChart />
-          </Item>
-        </Grid>
-        <Grid xs={6} md={8}>
-          <Item></Item>
-        </Grid>
-        <Grid xs={6} md={4}>
-          <Item></Item>
-        </Grid>
-      </Grid>
-    </Box>
+      </Box>
+    </>
   );
 }
