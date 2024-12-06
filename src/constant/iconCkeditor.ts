@@ -187,10 +187,7 @@ export const GroupQuotes = `<svg width="20" height="20" xmlns="http://www.w3.org
 </svg>`;
 
 export const QuotesWithIconSVG = `<svg width="20px" height="20px" xmlns="http://www.w3.org/2000/svg">
-  <g transform="translate(0, 2)">
-    <text x="5" y="12" font-size="14px" font-family="Arial">“</text> <!-- Ký tự ngoặc lớn -->
-    <text x="12" y="10" font-size="5px" font-family="Arial">ABC</text> <!-- Chữ abc nhỏ -->
-  </g>
+  <text x="2" y="8" font-size="10px" font-family="Arial" font-weight="bold">“</text>
+  <text x="6" y="12" font-size="6px" font-family="Arial" font-weight="bold">ABC</text>
 </svg>
-
 `;

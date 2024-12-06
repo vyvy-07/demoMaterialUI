@@ -1192,8 +1192,6 @@ function CustomEditor() {
               ],
               toolbar: {
                 items: [
-                  'insertQuotesWithIcon',
-
                   'uploadMedia',
                   'grid',
                   'removeFormat',
@@ -1231,6 +1229,7 @@ function CustomEditor() {
                       'blockQuote',
                       'insertQuoteLines',
                       'insertCustomBlock',
+                      'insertQuotesWithIcon',
                     ],
                   },
 
