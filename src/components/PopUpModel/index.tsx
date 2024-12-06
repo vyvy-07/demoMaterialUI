@@ -16,9 +16,12 @@ const PopUpModel = ({ editor }: { editor: any }) => {
             allowIn: [
               'imageBlock',
               'grid9x3',
+              'grid3x9',
               'grid6x6',
               'grid3x6x3',
               'Grid2x8x2',
+              'grid4x8',
+              'grid8x4',
             ],
             allowContentOf: '$block',
           });
@@ -50,8 +53,6 @@ const PopUpModel = ({ editor }: { editor: any }) => {
 
         // Tự động thêm caption nếu cần
         const captionElement = writer.createElement('caption');
-        // const textNode = writer.createText('Caption cho ảnh ở đây');
-        // writer.append(textNode, captionElement);
         writer.append(captionElement, imageElement); // Gắn caption vào hình ảnh
 
         // Đảm bảo caption có thể chỉnh sửa

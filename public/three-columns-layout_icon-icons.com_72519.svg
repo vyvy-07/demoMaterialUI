@@ -1,31 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 100">
-  <g fill="none" stroke="black" stroke-width="2">
-    <!-- Icon 66 -->
-    <rect x="10" y="10" width="40" height="40" stroke="black" />
-    <text x="20" y="35" font-family="Arial" font-size="18" fill="black">66</text>
-    
-    <!-- Icon 39 -->
-    <rect x="60" y="10" width="40" height="40" stroke="black" />
-    <text x="70" y="35" font-family="Arial" font-size="18" fill="black">39</text>
-    
-    <!-- Icon 93 -->
-    <rect x="110" y="10" width="40" height="40" stroke="black" />
-    <text x="120" y="35" font-family="Arial" font-size="18" fill="black">93</text>
-    
-    <!-- Icon 48 -->
-    <rect x="160" y="10" width="40" height="40" stroke="black" />
-    <text x="170" y="35" font-family="Arial" font-size="18" fill="black">48</text>
-    
-    <!-- Icon 84 -->
-    <rect x="210" y="10" width="40" height="40" stroke="black" />
-    <text x="220" y="35" font-family="Arial" font-size="18" fill="black">84</text>
-    
-    <!-- Icon 444 -->
-    <rect x="260" y="10" width="40" height="40" stroke="black" />
-    <text x="270" y="35" font-family="Arial" font-size="18" fill="black">444</text>
-    
-    <!-- Icon 363 -->
-    <rect x="310" y="10" width="40" height="40" stroke="black" />
-    <text x="320" y="35" font-family="Arial" font-size="18" fill="black">363</text>
-  </g>
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
+<svg height="800px" width="800px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
+	 viewBox="0 0 32 32" xml:space="preserve">
+<g>
+	<g id="right_x5F_quote">
+		<g>
+			<path style="fill:#030104;" d="M0,4v12h8c0,4.41-3.586,8-8,8v4c6.617,0,12-5.383,12-12V4H0z"/>
+			<path style="fill:#030104;" d="M20,4v12h8c0,4.41-3.586,8-8,8v4c6.617,0,12-5.383,12-12V4H20z"/>
+		</g>
+	</g>
+</g>
 </svg>
