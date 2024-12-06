@@ -81,6 +81,7 @@ import {
   LineHorizontal,
   LineParallel,
   Quotes,
+  QuotesWithIconSVG,
 } from '@/constant/iconCkeditor';
 import './style.css';
 class ScreenPlugin extends Plugin {
@@ -1047,7 +1048,7 @@ class QuotesWithIcon extends Plugin {
       const buttonView = new ButtonView(locale);
       buttonView.set({
         label: 'Insert Quote with Icon',
-        icon: LineHorizontal, // Replace with your icon if needed
+        icon: QuotesWithIconSVG, // Replace with your icon if needed
         tooltip: true,
       });
 

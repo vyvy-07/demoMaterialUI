@@ -185,3 +185,12 @@ export const LineHorizontal = `<svg width="20" height="2" viewBox="0 0 20 2" xml
 export const GroupQuotes = `<svg width="20" height="20" xmlns="http://www.w3.org/2000/svg">
   <text x="2" y="15" font-family="Arial" font-size="15" font-weight="bold" fill="black">Ω</text>
 </svg>`;
+
+export const QuotesWithIconSVG = `<svg width="20px" height="20px" xmlns="http://www.w3.org/2000/svg">
+  <g transform="translate(0, 2)">
+    <text x="5" y="12" font-size="14px" font-family="Arial">“</text> <!-- Ký tự ngoặc lớn -->
+    <text x="12" y="10" font-size="5px" font-family="Arial">ABC</text> <!-- Chữ abc nhỏ -->
+  </g>
+</svg>
+
+`;
