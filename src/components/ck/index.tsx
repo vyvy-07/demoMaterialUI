@@ -84,6 +84,9 @@ import {
   QuotesWithIconSVG,
 } from '@/constant/iconCkeditor';
 import './style.css';
+interface EditorConfig {
+  boxQuotes?: { type: string }[]; // Mở rộng thêm thuộc tính boxQuotes
+}
 class ScreenPlugin extends Plugin {
   static get requires() {
     // ADDED
@@ -1099,6 +1102,447 @@ class InsertQuotesWithIcon extends Command {
     this.isEnabled = true;
   }
 }
+class BoxQuotesBlue extends Plugin {
+  init() {
+    const editor: any = this.editor;
+
+    this.registerSchema();
+    this.addDowncastConversion();
+    this.addUpcastConversion();
+    this.addInsertCustomBlockCommand();
+  }
+
+  private registerSchema() {
+    const editor: any = this.editor;
+
+    editor.model.schema.register('boxQuotesBlue', {
+      inheritAllFrom: '$block',
+      allowContentOf: '$root',
+    });
+  }
+
+  private addDowncastConversion() {
+    const editor: any = this.editor;
+
+    editor.conversion.for('downcast').elementToElement({
+      model: 'boxQuotesBlue',
+      view: (modelElement: any, { writer }: { writer: any }) => {
+        return writer.createContainerElement('blockquote', {
+          class: 'box-quotes-blue',
+        });
+      },
+    });
+  }
+
+  private addUpcastConversion() {
+    const editor: any = this.editor;
+
+    editor.conversion.for('upcast').elementToElement({
+      view: {
+        name: 'blockquote',
+        classes: 'box-quotes-blue',
+      },
+      model: 'boxQuotesBlue',
+    });
+  }
+
+  private addInsertCustomBlockCommand() {
+    const editor: any = this.editor;
+
+    editor.commands.add('insertBoxQuotesBlue', new InsertBoxQuotesBlue(editor));
+    editor.ui.componentFactory.add('insertBoxQuotesBlue', (locale: any) => {
+      const buttonView = new ButtonView(locale);
+      buttonView.set({
+        label: 'Insert Box Quote (Blue)',
+        // icon: BoxQuotesBlueSVG, // Replace with your icon
+        tooltip: true,
+      });
+
+      buttonView.on('execute', () => editor.execute('insertBoxQuotesBlue'));
+
+      return buttonView;
+    });
+  }
+}
+
+class InsertBoxQuotesBlue extends Command {
+  execute() {
+    const editor = this.editor;
+
+    editor.model.change((writer) => {
+      this.removeNestedBlockquotes(writer);
+      this.insertCustomQuoteLines(writer, editor);
+    });
+  }
+
+  private removeNestedBlockquotes(writer: any) {
+    const document: any = this.editor.model.document;
+    const blocks = Array.from(document.getRoot().getChildren());
+
+    blocks.forEach((block: any) => {
+      if (block.is('element', 'blockquote')) {
+        const nestedBlockquote: any = Array.from(block.getChildren()).find(
+          (child: any) => child.is('element', 'blockquote')
+        );
+
+        if (nestedBlockquote) {
+          writer.remove(nestedBlockquote);
+        }
+      }
+    });
+  }
+
+  private insertCustomQuoteLines(writer: any, editor: any) {
+    const quote = writer.createElement('boxQuotesBlue');
+    const paragraph = writer.createElement('paragraph');
+    writer.append(paragraph, quote);
+
+    editor.model.insertContent(quote);
+    writer.setSelection(paragraph, 'in');
+  }
+
+  refresh() {
+    this.isEnabled = true;
+  }
+}
+
+class BoxQuotesGrey extends Plugin {
+  init() {
+    const editor: any = this.editor;
+
+    this.registerSchema();
+    this.addDowncastConversion();
+    this.addUpcastConversion();
+    this.addInsertCustomBlockCommand();
+  }
+
+  private registerSchema() {
+    const editor: any = this.editor;
+
+    editor.model.schema.register('boxQuotesGrey', {
+      inheritAllFrom: '$block',
+      allowContentOf: '$root',
+    });
+  }
+
+  private addDowncastConversion() {
+    const editor: any = this.editor;
+
+    editor.conversion.for('downcast').elementToElement({
+      model: 'boxQuotesGrey',
+      view: (modelElement: any, { writer }: { writer: any }) => {
+        return writer.createContainerElement('blockquote', {
+          class: 'box-quotes-grey',
+        });
+      },
+    });
+  }
+
+  private addUpcastConversion() {
+    const editor: any = this.editor;
+
+    editor.conversion.for('upcast').elementToElement({
+      view: {
+        name: 'blockquote',
+        classes: 'box-quotes-grey',
+      },
+      model: 'boxQuotesGrey',
+    });
+  }
+
+  private addInsertCustomBlockCommand() {
+    const editor: any = this.editor;
+
+    editor.commands.add('insertBoxQuotesGrey', new InsertBoxQuotesGrey(editor));
+    editor.ui.componentFactory.add('insertBoxQuotesGrey', (locale: any) => {
+      const buttonView = new ButtonView(locale);
+      buttonView.set({
+        label: 'Insert Box Quote (Grey)',
+        // icon: 'BoxQuotesGreySVG', // Replace with your icon
+        tooltip: true,
+      });
+
+      buttonView.on('execute', () => editor.execute('insertBoxQuotesGrey'));
+
+      return buttonView;
+    });
+  }
+}
+
+class InsertBoxQuotesGrey extends Command {
+  execute() {
+    const editor = this.editor;
+
+    editor.model.change((writer) => {
+      this.removeNestedBlockquotes(writer);
+      this.insertCustomQuoteLines(writer, editor);
+    });
+  }
+
+  private removeNestedBlockquotes(writer: any) {
+    const document: any = this.editor.model.document;
+    const blocks = Array.from(document.getRoot().getChildren());
+
+    blocks.forEach((block: any) => {
+      if (block.is('element', 'blockquote')) {
+        const nestedBlockquote: any = Array.from(block.getChildren()).find(
+          (child: any) => child.is('element', 'blockquote')
+        );
+
+        if (nestedBlockquote) {
+          writer.remove(nestedBlockquote);
+        }
+      }
+    });
+  }
+
+  private insertCustomQuoteLines(writer: any, editor: any) {
+    const quote = writer.createElement('boxQuotesGrey');
+    const paragraph = writer.createElement('paragraph');
+    writer.append(paragraph, quote);
+
+    editor.model.insertContent(quote);
+    writer.setSelection(paragraph, 'in');
+  }
+
+  refresh() {
+    this.isEnabled = true;
+  }
+}
+class BoxQuotesGreen extends Plugin {
+  init() {
+    const editor: any = this.editor;
+    this.registerSchema();
+    this.addDowncastConversion();
+    this.addUpcastConversion();
+    this.addInsertCustomBlockCommand();
+  }
+
+  private registerSchema() {
+    const editor: any = this.editor;
+
+    // Register a schema for the green box quote
+    editor.model.schema.register('boxQuotesGreen', {
+      inheritAllFrom: '$block',
+      allowContentOf: '$root',
+    });
+  }
+
+  private addDowncastConversion() {
+    const editor: any = this.editor;
+    const conversion = editor.conversion;
+
+    // Downcast: Convert the model to a green boxquote in the view
+    conversion.for('downcast').elementToElement({
+      model: 'boxQuotesGreen',
+      view: (modelElement: any, { writer }: { writer: any }) => {
+        return writer.createContainerElement('blockquote', {
+          class: 'box-quotes-green',
+        });
+      },
+    });
+  }
+
+  private addUpcastConversion() {
+    const editor: any = this.editor;
+    const conversion = editor.conversion;
+
+    // Upcast: Convert a view blockquote with the 'box-quotes-green' class into a model element
+    conversion.for('upcast').elementToElement({
+      view: {
+        name: 'blockquote',
+        classes: 'box-quotes-green',
+      },
+      model: 'boxQuotesGreen',
+    });
+  }
+
+  private addInsertCustomBlockCommand() {
+    const editor: any = this.editor;
+
+    // Add a custom command to insert the green box quote
+    editor.commands.add(
+      'insertBoxQuotesGreen',
+      new InsertBoxQuotesGreen(editor)
+    );
+
+    // Add the button to the UI
+    editor.ui.componentFactory.add('insertBoxQuotesGreen', (locale: any) => {
+      const buttonView = new ButtonView(locale);
+
+      buttonView.set({
+        label: 'Insert Box Quote (Green)',
+        // icon: BoxQuotesGreenSVG, // Replace with your custom icon
+        tooltip: true,
+      });
+
+      // Execute the insert command when the button is clicked
+      buttonView.on('execute', () => editor.execute('insertBoxQuotesGreen'));
+
+      return buttonView;
+    });
+  }
+}
+
+class InsertBoxQuotesGreen extends Command {
+  execute() {
+    const editor = this.editor;
+
+    // Change the model: remove nested blockquotes and insert the green boxquote
+    editor.model.change((writer) => {
+      this.removeNestedBlockquotes(writer);
+      this.insertCustomQuoteLines(writer, editor);
+    });
+  }
+
+  private removeNestedBlockquotes(writer: any) {
+    const document: any = this.editor.model.document;
+    const blocks = Array.from(document.getRoot().getChildren());
+
+    blocks.forEach((block: any) => {
+      if (block.is('element', 'blockquote')) {
+        const nestedBlockquote: any = Array.from(block.getChildren()).find(
+          (child: any) => child.is('element', 'blockquote')
+        );
+
+        if (nestedBlockquote) {
+          writer.remove(nestedBlockquote);
+        }
+      }
+    });
+  }
+
+  private insertCustomQuoteLines(writer: any, editor: any) {
+    const quote = writer.createElement('boxQuotesGreen');
+    const paragraph = writer.createElement('paragraph');
+
+    writer.append(paragraph, quote);
+    editor.model.insertContent(quote);
+    writer.setSelection(paragraph, 'in');
+  }
+
+  refresh() {
+    // Enable the command when needed
+    this.isEnabled = true;
+  }
+}
+class QuotesFitContent extends Plugin {
+  init() {
+    const editor: any = this.editor;
+    this.registerSchema();
+    this.addDowncastConversion();
+    this.addUpcastConversion();
+    this.addInsertCustomBlockCommand();
+  }
+
+  private registerSchema() {
+    const editor: any = this.editor;
+
+    // Đăng ký schema cho QuotesFitContent
+    editor.model.schema.register('QuotesFitContent', {
+      inheritAllFrom: '$block',
+      allowContentOf: '$root',
+    });
+  }
+
+  private addDowncastConversion() {
+    const editor: any = this.editor;
+    const conversion = editor.conversion;
+
+    // Downcast: Model -> View với class QuotesFitContent
+    conversion.for('downcast').elementToElement({
+      model: 'QuotesFitContent',
+      view: (modelElement: any, { writer }: { writer: any }) => {
+        return writer.createContainerElement('blockquote', {
+          class: 'QuotesFitContent',
+        });
+      },
+    });
+  }
+
+  private addUpcastConversion() {
+    const editor: any = this.editor;
+    const conversion = editor.conversion;
+
+    // Upcast: View -> Model với class QuotesFitContent
+    conversion.for('upcast').elementToElement({
+      view: {
+        name: 'blockquote',
+        classes: 'QuotesFitContent',
+      },
+      model: 'QuotesFitContent',
+    });
+  }
+
+  private addInsertCustomBlockCommand() {
+    const editor: any = this.editor;
+
+    // Thêm command chèn block QuotesFitContent
+    editor.commands.add(
+      'insertQuotesFitContent',
+      new InsertQuotesFitContent(editor)
+    );
+
+    // Thêm nút vào UI
+    editor.ui.componentFactory.add('insertQuotesFitContent', (locale: any) => {
+      const buttonView = new ButtonView(locale);
+
+      buttonView.set({
+        label: 'Insert QuotesFitContent',
+        // icon: QuotesFitContentSVG, // Thay thế bằng icon bạn muốn
+        tooltip: true,
+      });
+
+      // Khi nhấn nút, thực hiện command
+      buttonView.on('execute', () => editor.execute('insertQuotesFitContent'));
+
+      return buttonView;
+    });
+  }
+}
+
+class InsertQuotesFitContent extends Command {
+  execute() {
+    const editor = this.editor;
+
+    // Thay đổi model: Xóa các blockquotes lồng nhau và chèn block mới
+    editor.model.change((writer) => {
+      this.removeNestedBlockquotes(writer);
+      this.insertCustomQuoteLines(writer, editor);
+    });
+  }
+
+  private removeNestedBlockquotes(writer: any) {
+    const document: any = this.editor.model.document;
+    const blocks = Array.from(document.getRoot().getChildren());
+
+    blocks.forEach((block: any) => {
+      if (block.is('element', 'blockquote')) {
+        const nestedBlockquote: any = Array.from(block.getChildren()).find(
+          (child: any) => child.is('element', 'blockquote')
+        );
+
+        if (nestedBlockquote) {
+          writer.remove(nestedBlockquote);
+        }
+      }
+    });
+  }
+
+  private insertCustomQuoteLines(writer: any, editor: any) {
+    const quote = writer.createElement('QuotesFitContent');
+    const paragraph = writer.createElement('paragraph');
+
+    writer.append(paragraph, quote);
+    editor.model.insertContent(quote);
+    writer.setSelection(paragraph, 'in');
+  }
+
+  refresh() {
+    // Bật command khi cần thiết
+    this.isEnabled = true;
+  }
+}
 
 function CustomEditor() {
   const editorRef = useRef<any>(null);
@@ -1127,7 +1571,11 @@ function CustomEditor() {
             editor={ClassicEditor}
             config={{
               plugins: [
+                QuotesFitContent,
+                BoxQuotesBlue,
+                BoxQuotesGreen,
                 QuotesWithIcon,
+                BoxQuotesGrey,
                 BlockHorizontal,
                 BlockQuoteBorder,
                 Grid3x9,
@@ -1192,6 +1640,10 @@ function CustomEditor() {
               ],
               toolbar: {
                 items: [
+                  // 'insertQuotesFitContent',
+                  // 'InsertBoxQuotesGreen',
+                  // 'insertBoxQuotesBlue',
+                  // 'InsertBoxQuotesGrey',
                   'uploadMedia',
                   'grid',
                   'removeFormat',
@@ -1227,9 +1679,14 @@ function CustomEditor() {
                     icon: GroupQuotes,
                     items: [
                       'blockQuote',
+
                       'insertQuoteLines',
                       'insertCustomBlock',
                       'insertQuotesWithIcon',
+                      'insertQuotesFitContent',
+                      'InsertBoxQuotesGreen',
+                      'insertBoxQuotesBlue',
+                      'InsertBoxQuotesGrey',
                     ],
                   },
 
@@ -1264,7 +1721,6 @@ function CustomEditor() {
                 ],
                 shouldNotGroupWhenFull: true,
               },
-
               image: {
                 toolbar: [
                   'ckboxImageEdit',
