@@ -16,6 +16,14 @@ h3 {
 h4 {
   @apply font-semibold text-[16px];
 }
+.ckeditor {
+  width: 700px;
+  padding-right: 0;
+}
+.ckeditor.active {
+  width: 100%;
+  padding-right: 120px;
+}
 .ck-content .grid6x6 {
   display: grid;
   grid-template-columns: repeat(2, 1fr);

@@ -1570,7 +1570,7 @@ function CustomEditor() {
     <>
       <PopUpModel editor={editorRef.current} />
       <div className="grid grid-cols-2 gap-6">
-        <div className="ckeditor overflow-auto">
+        <div className="ckeditor ">
           <CKEditor
             editor={ClassicEditor}
             config={{
@@ -1644,10 +1644,6 @@ function CustomEditor() {
               ],
               toolbar: {
                 items: [
-                  // 'insertQuotesFitContent',
-                  // 'InsertBoxQuotesGreen',
-                  // 'insertBoxQuotesBlue',
-                  // 'InsertBoxQuotesGrey',
                   'uploadMedia',
                   'grid',
                   'removeFormat',
