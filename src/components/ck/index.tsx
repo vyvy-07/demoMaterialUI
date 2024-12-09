@@ -88,9 +88,7 @@ import {
   QuotesWithIconSVG,
 } from '@/constant/iconCkeditor';
 import './style.css';
-interface EditorConfig {
-  boxQuotes?: { type: string }[]; // Mở rộng thêm thuộc tính boxQuotes
-}
+
 class ScreenPlugin extends Plugin {
   static get requires() {
     // ADDED
@@ -145,187 +143,98 @@ class UploadMedia extends Plugin {
   }
 }
 
-class Grid9x3 extends Plugin {
-  static get requires() {
-    return [Widget];
-  }
+abstract class GridPlugin extends Plugin {
+  // Abstract properties for grid configurations
+  abstract gridTemplate: string;
+  abstract gridName: string;
+  abstract cellName: string;
+  abstract cellClass: string;
+  abstract icon: string;
 
   init() {
     const editor = this.editor;
 
-    // Đăng ký schema cho grid9x3 và cell9x3
-    editor.model.schema.register('grid9x3', {
+    // Register schema for the grid and cells
+    editor.model.schema.register(this.gridName, {
       isObject: true,
       allowWhere: '$block',
     });
 
-    editor.model.schema.register('cell9x3', {
-      allowIn: 'grid9x3',
+    editor.model.schema.register(this.cellName, {
+      allowIn: this.gridName,
       isBlock: true,
       allowContentOf: '$block',
       allowAttributes: ['src', 'alt'],
     });
 
-    editor.model.schema.extend('cell9x3', {
-      allowContentOf: '$root', // Cho phép các phần tử cấp block bên trong
+    // Extend schema for cells
+    editor.model.schema.extend(this.cellName, {
+      allowContentOf: '$root', // Allow block-level elements inside cells
     });
 
-    // Đăng ký schema cho caption và đảm bảo nó là widget để có thể chỉnh sửa
-    editor.model.schema.register('caption', {
-      allowIn: [
-        'imageBlock',
-        'grid9x3',
-        'grid6x6',
-        'grid3x6x3',
-        'grid2x8x2',
-        'grid3x9',
-        'grid4x8',
-        'grid8x4',
-      ],
-      allowContentOf: '$block',
-    });
+    // Upcast and downcast for the grid and cells
+    this.addUpcastDowncastConversions(editor);
 
-    // Upcast và downcast cho grid9x3 và cell9x3
+    // Add the button to insert the grid
+    this.addInsertGridButton(editor);
+  }
+
+  private addUpcastDowncastConversions(editor: any) {
+    // Upcast for grid and cells
     editor.conversion.for('upcast').elementToElement({
-      model: 'grid9x3',
+      model: this.gridName,
       view: {
         name: 'div',
-        styles:
-          'display: grid; grid-template-columns: 9fr 3fr; gap: 4px; border: 1px dashed #ccc;',
+        styles: `display: grid; grid-template-columns: ${this.gridTemplate}; gap: 4px; border: 1px dashed #ccc;`,
       },
     });
 
     editor.conversion.for('upcast').elementToElement({
-      model: 'cell9x3',
+      model: this.cellName,
       view: {
         name: 'div',
-        classes: 'bordered-cell',
+        classes: this.cellClass,
       },
     });
 
+    // Downcast for grid and cells
     editor.conversion.for('downcast').elementToElement({
-      model: 'grid9x3',
-      view: (modelElement, { writer }) => {
+      model: this.gridName,
+      view: (modelElement: any, { writer }: { writer: any }) => {
         return writer.createContainerElement('div', {
-          style:
-            'display: grid; grid-template-columns: 9fr 3fr; gap: 4px; border: 1px dashed #ccc;',
+          style: `display: grid; grid-template-columns: ${this.gridTemplate}; gap: 4px; border: 1px dashed #ccc;`,
         });
       },
     });
 
     editor.conversion.for('downcast').elementToElement({
-      model: 'cell9x3',
-      view: (modelElement, { writer }) => {
-        return writer.createContainerElement('div', { class: 'bordered-cell' });
+      model: this.cellName,
+      view: (modelElement: any, { writer }: { writer: any }) => {
+        return writer.createContainerElement('div', { class: this.cellClass });
       },
     });
+  }
 
-    // Thêm nút grid9x3 vào toolbar
-    editor.ui.componentFactory.add('grid9x3', (locale: any) => {
+  private addInsertGridButton(editor: any) {
+    // Add button for grid insertion
+    editor.ui.componentFactory.add(this.gridName, (locale: any) => {
       const button = new ButtonView(locale);
       button.set({
-        label: 'Insert Grid 9x3',
-        icon: GridIcon9x3,
+        label: `Insert ${this.gridName}`,
         tooltip: true,
+        icon: this.icon,
       });
 
       button.on('execute', () => {
-        editor.model.change((writer) => {
-          const gridElement = writer.createElement('grid9x3');
-          const cell1 = writer.createElement('cell9x3');
-          const cell2 = writer.createElement('cell9x3');
-          writer.append(cell1, gridElement);
-          writer.append(cell2, gridElement);
-
-          editor.model.insertContent(
-            gridElement,
-            editor.model.document.selection
-          );
-        });
-      });
-
-      return button;
-    });
-  }
-}
-class Grid3x9 extends Plugin {
-  static get requires() {
-    return [Widget];
-  }
-
-  init() {
-    const editor = this.editor;
-
-    // Đăng ký schema cho grid3x9 và cell3x9
-    editor.model.schema.register('grid3x9', {
-      isObject: true,
-      allowWhere: '$block',
-    });
-
-    editor.model.schema.register('cell3x9', {
-      allowIn: 'grid3x9',
-      isBlock: true,
-      allowContentOf: '$block',
-      allowAttributes: ['src', 'alt'],
-    });
-
-    editor.model.schema.extend('cell3x9', {
-      allowContentOf: '$root', // Cho phép các phần tử cấp block bên trong
-    });
-
-    // Upcast và downcast cho grid3x9 và cell3x9
-    editor.conversion.for('upcast').elementToElement({
-      model: 'grid3x9',
-      view: {
-        name: 'div',
-        styles:
-          'display: grid; grid-template-columns: 3fr 9fr; gap: 4px; border: 1px dashed #ccc;',
-      },
-    });
-
-    editor.conversion.for('upcast').elementToElement({
-      model: 'cell3x9',
-      view: {
-        name: 'div',
-        classes: 'bordered-cell',
-      },
-    });
-
-    editor.conversion.for('downcast').elementToElement({
-      model: 'grid3x9',
-      view: (modelElement, { writer }) => {
-        return writer.createContainerElement('div', {
-          style:
-            'display: grid; grid-template-columns: 3fr 9fr; gap: 4px; border: 1px dashed #ccc;',
-        });
-      },
-    });
-
-    editor.conversion.for('downcast').elementToElement({
-      model: 'cell3x9',
-      view: (modelElement, { writer }) => {
-        return writer.createContainerElement('div', { class: 'bordered-cell' });
-      },
-    });
-
-    // Thêm nút grid3x9 vào toolbar
-    editor.ui.componentFactory.add('grid3x9', (locale) => {
-      const button = new ButtonView(locale);
-      button.set({
-        label: 'Insert Grid 3x9',
-        icon: GridIcon3x9, // Thay biểu tượng nếu cần
-        tooltip: true,
-      });
-
-      button.on('execute', () => {
-        editor.model.change((writer) => {
-          const gridElement = writer.createElement('grid3x9');
+        editor.model.change((writer: any) => {
+          const gridElement = writer.createElement(this.gridName);
+          // Add cells to the grid
           for (let i = 0; i < 2; i++) {
-            // Tạo 2 ô cho lưới 3x9
-            const cell = writer.createElement('cell3x9');
+            const cell = writer.createElement(this.cellName);
             writer.append(cell, gridElement);
           }
 
+          // Insert grid element into the editor
           editor.model.insertContent(
             gridElement,
             editor.model.document.selection
@@ -338,982 +247,67 @@ class Grid3x9 extends Plugin {
   }
 }
 
-class Grid6x6 extends Plugin {
-  static get requires() {
-    return [Widget];
-  }
-
-  init() {
-    const editor = this.editor;
-
-    // Đăng ký schema cho grid6x6 và cell6x6
-    editor.model.schema.register('grid6x6', {
-      isObject: true,
-      allowWhere: '$block',
-    });
-
-    editor.model.schema.register('cell6x6', {
-      allowIn: 'grid6x6',
-      isBlock: true,
-      allowContentOf: '$block',
-      allowAttributes: ['src', 'alt'],
-    });
-
-    editor.model.schema.extend('cell6x6', {
-      allowContentOf: '$root', // Cho phép các phần tử cấp block bên trong
-    });
-
-    // // Đăng ký schema cho caption và đảm bảo nó là widget để có thể chỉnh sửa
-    // editor.model.schema.register('caption', {
-    //   allowIn: ['imageBlock', 'grid6x6'],
-    //   allowContentOf: '$block',
-    // });
-
-    // Upcast và downcast cho grid6x6 và cell6x6
-    editor.conversion.for('upcast').elementToElement({
-      model: 'grid6x6',
-      view: {
-        name: 'div',
-        styles:
-          'display: grid; grid-template-columns: 6fr 6fr; gap: 4px; border: 1px dashed #ccc;',
-      },
-    });
-
-    editor.conversion.for('upcast').elementToElement({
-      model: 'cell6x6',
-      view: {
-        name: 'div',
-        classes: 'bordered-cell',
-      },
-    });
-
-    editor.conversion.for('downcast').elementToElement({
-      model: 'grid6x6',
-      view: (modelElement, { writer }) => {
-        return writer.createContainerElement('div', {
-          style:
-            'display: grid; grid-template-columns: 6fr 6fr; gap: 4px; border: 1px dashed #ccc;',
-        });
-      },
-    });
-
-    editor.conversion.for('downcast').elementToElement({
-      model: 'cell6x6',
-      view: (modelElement, { writer }) => {
-        return writer.createContainerElement('div', { class: 'bordered-cell' });
-      },
-    });
-
-    // Thêm nút grid6x6 vào toolbar
-    editor.ui.componentFactory.add('grid6x6', (locale: any) => {
-      const button = new ButtonView(locale);
-      button.set({
-        label: 'Insert Grid 6x6',
-        icon: GridIcon6x6,
-        tooltip: true,
-      });
-
-      button.on('execute', () => {
-        editor.model.change((writer) => {
-          const gridElement = writer.createElement('grid6x6');
-          for (let i = 0; i < 2; i++) {
-            const cell = writer.createElement('cell6x6');
-            writer.append(cell, gridElement);
-          }
-
-          editor.model.insertContent(
-            gridElement,
-            editor.model.document.selection
-          );
-        });
-      });
-
-      return button;
-    });
-  }
-}
-class Grid3x6x3 extends Plugin {
-  static get requires() {
-    return [Widget];
-  }
-
-  init() {
-    const editor = this.editor;
-
-    // Đăng ký schema cho Grid3x6x3 và Cell3x6x3
-    editor.model.schema.register('grid3x6x3', {
-      isObject: true,
-      allowWhere: '$block',
-    });
-
-    editor.model.schema.register('cell3x6x3', {
-      allowIn: 'grid3x6x3',
-      isBlock: true,
-      allowContentOf: '$block',
-      allowAttributes: ['src', 'alt'],
-    });
-
-    editor.model.schema.extend('cell3x6x3', {
-      allowContentOf: '$root', // Cho phép các phần tử cấp block bên trong
-    });
-
-    // Upcast và downcast cho Grid3x6x3 và Cell3x6x3
-    editor.conversion.for('upcast').elementToElement({
-      model: 'grid3x6x3',
-      view: {
-        name: 'div',
-        styles:
-          'display: grid; grid-template-columns: 3fr 6fr 3fr; gap: 4px; border: 1px dashed #ccc;',
-      },
-    });
-
-    editor.conversion.for('upcast').elementToElement({
-      model: 'cell3x6x3',
-      view: {
-        name: 'div',
-        classes: 'bordered-cell',
-      },
-    });
-
-    editor.conversion.for('downcast').elementToElement({
-      model: 'grid3x6x3',
-      view: (modelElement, { writer }) => {
-        return writer.createContainerElement('div', {
-          style:
-            'display: grid; grid-template-columns: 3fr 6fr 3fr; gap: 4px; border: 1px dashed #ccc;',
-        });
-      },
-    });
-
-    editor.conversion.for('downcast').elementToElement({
-      model: 'cell3x6x3',
-      view: (modelElement, { writer }) => {
-        return writer.createContainerElement('div', { class: 'bordered-cell' });
-      },
-    });
-
-    // Thêm nút Grid3x6x3 vào toolbar
-    editor.ui.componentFactory.add('grid3x6x3', (locale) => {
-      const button = new ButtonView(locale);
-      button.set({
-        label: 'Insert Grid 3x6x3',
-        icon: GridIcon3x6x3,
-        withText: false,
-        tooltip: true,
-      });
-
-      button.on('execute', () => {
-        editor.model.change((writer) => {
-          const gridElement = writer.createElement('grid3x6x3');
-          // Thêm 3 cell tương ứng với cấu hình 3x6x3
-          for (let i = 0; i < 3; i++) {
-            const cell = writer.createElement('cell3x6x3');
-            writer.append(cell, gridElement);
-          }
-
-          editor.model.insertContent(
-            gridElement,
-            editor.model.document.selection
-          );
-        });
-      });
-
-      return button;
-    });
-  }
-}
-class Grid2x8x2 extends Plugin {
-  static get requires() {
-    return [Widget];
-  }
-
-  init() {
-    const editor = this.editor;
-
-    // Đăng ký schema cho Grid2x8x2 và Cell2x8x2
-    editor.model.schema.register('grid2x8x2', {
-      isObject: true,
-      allowWhere: '$block',
-    });
-
-    editor.model.schema.register('cell2x8x2', {
-      allowIn: 'grid2x8x2',
-      isBlock: true,
-      allowContentOf: '$block',
-      allowAttributes: ['src', 'alt'],
-    });
-
-    editor.model.schema.extend('cell2x8x2', {
-      allowContentOf: '$root', // Cho phép các phần tử cấp block bên trong
-    });
-
-    // Upcast và downcast cho Grid2x8x2 và Cell2x8x2
-    editor.conversion.for('upcast').elementToElement({
-      model: 'grid2x8x2',
-      view: {
-        name: 'div',
-        styles:
-          'display: grid; grid-template-columns: 2fr 8fr 2fr; gap: 4px; border: 1px dashed #ccc;',
-      },
-    });
-
-    editor.conversion.for('upcast').elementToElement({
-      model: 'cell2x8x2',
-      view: {
-        name: 'div',
-        classes: 'bordered-cell',
-      },
-    });
-
-    editor.conversion.for('downcast').elementToElement({
-      model: 'grid2x8x2',
-      view: (modelElement, { writer }) => {
-        return writer.createContainerElement('div', {
-          style:
-            'display: grid; grid-template-columns: 2fr 8fr 2fr; gap: 4px; border: 1px dashed #ccc;',
-        });
-      },
-    });
-
-    editor.conversion.for('downcast').elementToElement({
-      model: 'cell2x8x2',
-      view: (modelElement, { writer }) => {
-        return writer.createContainerElement('div', { class: 'bordered-cell' });
-      },
-    });
-
-    // Thêm nút Grid2x8x2 vào toolbar
-    editor.ui.componentFactory.add('grid2x8x2', (locale) => {
-      const button = new ButtonView(locale);
-      button.set({
-        label: 'Insert Grid 2x8x2',
-        icon: GridIcon2x8x2,
-        tooltip: true,
-      });
-
-      button.on('execute', () => {
-        editor.model.change((writer) => {
-          const gridElement = writer.createElement('grid2x8x2');
-          // Thêm 3 cell tương ứng với cấu hình 2x8x2
-          for (let i = 0; i < 3; i++) {
-            const cell = writer.createElement('cell2x8x2');
-            writer.append(cell, gridElement);
-          }
-
-          editor.model.insertContent(
-            gridElement,
-            editor.model.document.selection
-          );
-        });
-      });
-
-      return button;
-    });
-  }
-}
-class Grid8x4 extends Plugin {
-  static get requires() {
-    return [Widget];
-  }
-
-  init() {
-    const editor = this.editor;
-
-    // Đăng ký schema cho grid8x4 và cell8x4
-    editor.model.schema.register('grid8x4', {
-      isObject: true,
-      allowWhere: '$block',
-    });
-
-    editor.model.schema.register('cell8x4', {
-      allowIn: 'grid8x4',
-      isBlock: true,
-      allowContentOf: '$block',
-      allowAttributes: ['src', 'alt'],
-    });
-
-    editor.model.schema.extend('cell8x4', {
-      allowContentOf: '$root', // Cho phép các phần tử cấp block bên trong
-    });
-
-    // Upcast và downcast cho grid8x4 và cell8x4
-    editor.conversion.for('upcast').elementToElement({
-      model: 'grid8x4',
-      view: {
-        name: 'div',
-        styles:
-          'display: grid; grid-template-columns: 8fr 4fr; gap: 4px; border: 1px dashed #ccc;',
-      },
-    });
-
-    editor.conversion.for('upcast').elementToElement({
-      model: 'cell8x4',
-      view: {
-        name: 'div',
-        classes: 'bordered-cell',
-      },
-    });
-
-    editor.conversion.for('downcast').elementToElement({
-      model: 'grid8x4',
-      view: (modelElement, { writer }) => {
-        return writer.createContainerElement('div', {
-          style:
-            'display: grid; grid-template-columns: 8fr 4fr; gap: 4px; border: 1px dashed #ccc;',
-        });
-      },
-    });
-
-    editor.conversion.for('downcast').elementToElement({
-      model: 'cell8x4',
-      view: (modelElement, { writer }) => {
-        return writer.createContainerElement('div', { class: 'bordered-cell' });
-      },
-    });
-
-    // Thêm nút grid8x4 vào toolbar
-    editor.ui.componentFactory.add('grid8x4', (locale) => {
-      const button = new ButtonView(locale);
-      button.set({
-        label: 'Insert Grid 8x4',
-        icon: GridIcon8x4,
-        tooltip: true,
-      });
-
-      button.on('execute', () => {
-        editor.model.change((writer) => {
-          const gridElement = writer.createElement('grid8x4');
-          for (let i = 0; i < 2; i++) {
-            // Chỉ tạo 2 ô cho 2 cột
-            const cell = writer.createElement('cell8x4');
-            writer.append(cell, gridElement);
-          }
-
-          editor.model.insertContent(
-            gridElement,
-            editor.model.document.selection
-          );
-        });
-      });
-
-      return button;
-    });
-  }
-}
-class Grid4x8 extends Plugin {
-  static get requires() {
-    return [Widget];
-  }
-
-  init() {
-    const editor = this.editor;
-
-    // Đăng ký schema cho grid4x8 và cell4x8
-    editor.model.schema.register('grid4x8', {
-      isObject: true,
-      allowWhere: '$block',
-    });
-
-    editor.model.schema.register('cell4x8', {
-      allowIn: 'grid4x8',
-      isBlock: true,
-      allowContentOf: '$block',
-      allowAttributes: ['src', 'alt'],
-    });
-
-    editor.model.schema.extend('cell4x8', {
-      allowContentOf: '$root', // Cho phép các phần tử cấp block bên trong
-    });
-
-    // Upcast và downcast cho grid4x8 và cell4x8
-    editor.conversion.for('upcast').elementToElement({
-      model: 'grid4x8',
-      view: {
-        name: 'div',
-        styles:
-          'display: grid; grid-template-columns: 4fr 8fr; grid-template-rows: 1fr; gap: 4px; border: 1px dashed #ccc;',
-      },
-    });
-
-    editor.conversion.for('upcast').elementToElement({
-      model: 'cell4x8',
-      view: {
-        name: 'div',
-        classes: 'bordered-cell',
-      },
-    });
-
-    editor.conversion.for('downcast').elementToElement({
-      model: 'grid4x8',
-      view: (modelElement, { writer }) => {
-        return writer.createContainerElement('div', {
-          style:
-            'display: grid; grid-template-columns: 4fr 8fr; grid-template-rows: 1fr; gap: 4px; border: 1px dashed #ccc;',
-        });
-      },
-    });
-
-    editor.conversion.for('downcast').elementToElement({
-      model: 'cell4x8',
-      view: (modelElement, { writer }) => {
-        return writer.createContainerElement('div', { class: 'bordered-cell' });
-      },
-    });
-
-    // Thêm nút grid4x8 vào toolbar
-    editor.ui.componentFactory.add('grid4x8', (locale) => {
-      const button = new ButtonView(locale);
-      button.set({
-        label: 'Insert Grid 4x8',
-        icon: GridIcon4x8,
-        tooltip: true,
-      });
-
-      button.on('execute', () => {
-        editor.model.change((writer) => {
-          const gridElement = writer.createElement('grid4x8');
-          // Chỉ tạo 2 ô
-          for (let i = 0; i < 2; i++) {
-            const cell = writer.createElement('cell4x8');
-            writer.append(cell, gridElement);
-          }
-
-          editor.model.insertContent(
-            gridElement,
-            editor.model.document.selection
-          );
-        });
-      });
-
-      return button;
-    });
-  }
+// Grid9x3 subclass
+class Grid9x3 extends GridPlugin {
+  gridTemplate = '9fr 3fr';
+  gridName = 'grid9x3';
+  cellName = 'cell9x3';
+  cellClass = 'bordered-cell';
+  icon = GridIcon9x3;
 }
 
-class BlockQuoteBorder extends Plugin {
-  init() {
-    const editor: any = this.editor;
-
-    this.registerSchema();
-    this.addDowncastConversion();
-    this.addUpcastConversion();
-    this.addInsertQuoteLinesCommand();
-  }
-
-  private registerSchema() {
-    const editor: any = this.editor;
-
-    editor.model.schema.register('customQuoteLines', {
-      inheritAllFrom: '$block',
-      allowContentOf: '$root',
-    });
-  }
-
-  private addDowncastConversion() {
-    const editor: any = this.editor;
-
-    editor.conversion.for('downcast').elementToElement({
-      model: 'customQuoteLines',
-      view: (modelElement: any, { writer }: { writer: any }) => {
-        return writer.createContainerElement('blockquote', {
-          class: 'quote-lines',
-        });
-      },
-    });
-  }
-
-  private addUpcastConversion() {
-    const editor: any = this.editor;
-
-    editor.conversion.for('upcast').elementToElement({
-      view: {
-        name: 'blockquote',
-        classes: 'quote-lines',
-      },
-      model: 'customQuoteLines',
-    });
-  }
-
-  private addInsertQuoteLinesCommand() {
-    const editor: any = this.editor;
-
-    editor.commands.add(
-      'insertQuoteLines',
-      new InsertQuoteLinesCommand(editor)
-    );
-    editor.ui.componentFactory.add('insertQuoteLines', (locale: any) => {
-      const buttonView = new ButtonView(locale);
-      buttonView.set({
-        label: 'insertQuoteLines',
-        icon: LineParallel,
-        tooltip: true,
-      });
-
-      buttonView.on('execute', () => editor.execute('insertQuoteLines'));
-
-      return buttonView;
-    });
-  }
+// Grid3x9 subclass
+class Grid3x9 extends GridPlugin {
+  gridTemplate = '3fr 9fr';
+  gridName = 'grid3x9';
+  cellName = 'cell3x9';
+  cellClass = 'bordered-cell';
+  icon = GridIcon3x9;
+}
+class Grid6x6 extends GridPlugin {
+  gridTemplate = '6fr 6fr';
+  gridName = 'grid6x6';
+  cellName = 'cell6x6';
+  cellClass = 'bordered-cell';
+  icon = GridIcon6x6;
+}
+class Grid3x6x3 extends GridPlugin {
+  gridTemplate = '3fr 6fr 3fr';
+  gridName = 'grid3x6x3';
+  cellName = 'cell3x6x3';
+  cellClass = 'bordered-cell';
+  icon = GridIcon3x6x3;
+}
+class Grid2x8x2 extends GridPlugin {
+  gridTemplate = '2fr 8fr 2fr';
+  gridName = 'grid2x8x2';
+  cellName = 'cell2x8x2';
+  cellClass = 'bordered-cell';
+  icon = GridIcon2x8x2;
+}
+class Grid8x4 extends GridPlugin {
+  gridTemplate = ' 8fr 4fr';
+  gridName = 'grid8x4';
+  cellName = 'cell8x4';
+  cellClass = 'bordered-cell';
+  icon = GridIcon8x4;
+}
+class Grid4x8 extends GridPlugin {
+  gridTemplate = '4fr 8fr ';
+  gridName = 'grid4x8';
+  cellName = 'cell4x8';
+  cellClass = 'bordered-cell';
+  icon = GridIcon4x8;
 }
 
-class InsertQuoteLinesCommand extends Command {
-  execute() {
-    const editor = this.editor;
+abstract class CustomBlockPlugin extends Plugin {
+  // Abstract methods that must be implemented by child classes
+  abstract blockType: string;
+  abstract blockClass: string;
+  abstract commandName: string;
+  abstract buttonLabel: string;
+  abstract buttonIcon: string;
 
-    editor.model.change((writer) => {
-      this.removeNestedBlockquotes(writer);
-      this.insertCustomQuoteLines(writer, editor);
-    });
-  }
-
-  private removeNestedBlockquotes(writer: any) {
-    const document: any = this.editor.model.document;
-    const blocks = Array.from(document.getRoot().getChildren());
-
-    blocks.forEach((block: any) => {
-      if (block.is('element', 'blockquote')) {
-        const nestedBlockquote: any = Array.from(block.getChildren()).find(
-          (child: any) => child.is('element', 'blockquote')
-        );
-
-        if (nestedBlockquote) {
-          writer.remove(nestedBlockquote);
-        }
-      }
-    });
-  }
-
-  private insertCustomQuoteLines(writer: any, editor: any) {
-    const quote = writer.createElement('customQuoteLines');
-    const paragraph = writer.createElement('paragraph');
-    writer.append(paragraph, quote);
-
-    editor.model.insertContent(quote);
-    writer.setSelection(paragraph, 'in');
-  }
-
-  refresh() {
-    this.isEnabled = true;
-  }
-}
-
-class BlockHorizontal extends Plugin {
-  init() {
-    const editor: any = this.editor;
-
-    this.registerSchema();
-    this.addDowncastConversion();
-    this.addUpcastConversion();
-    this.addInsertCustomBlockCommand();
-  }
-
-  private registerSchema() {
-    const editor: any = this.editor;
-
-    editor.model.schema.register('customBlockQuote', {
-      inheritAllFrom: '$block',
-      allowContentOf: '$root',
-    });
-  }
-
-  private addDowncastConversion() {
-    const editor: any = this.editor;
-
-    editor.conversion.for('downcast').elementToElement({
-      model: 'customBlockQuote',
-      view: (modelElement: any, { writer }: { writer: any }) => {
-        return writer.createContainerElement('blockquote', {
-          class: 'custom-quote-button',
-        });
-      },
-    });
-  }
-
-  private addUpcastConversion() {
-    const editor: any = this.editor;
-
-    editor.conversion.for('upcast').elementToElement({
-      view: {
-        name: 'blockquote',
-        classes: 'custom-quote-button',
-      },
-      model: 'customBlockQuote',
-    });
-  }
-
-  private addInsertCustomBlockCommand() {
-    const editor: any = this.editor;
-
-    editor.commands.add('insertCustomBlock', new InsertBlockHorizontal(editor));
-    editor.ui.componentFactory.add('insertCustomBlock', (locale: any) => {
-      const buttonView = new ButtonView(locale);
-      buttonView.set({
-        label: 'Insert Custom Block',
-        icon: LineHorizontal,
-        tooltip: true,
-      });
-
-      buttonView.on('execute', () => editor.execute('insertCustomBlock'));
-
-      return buttonView;
-    });
-  }
-}
-
-class InsertBlockHorizontal extends Command {
-  execute() {
-    const editor = this.editor;
-
-    editor.model.change((writer) => {
-      this.removeNestedBlockquotes(writer);
-      this.insertCustomQuoteLines(writer, editor);
-    });
-  }
-
-  private removeNestedBlockquotes(writer: any) {
-    const document: any = this.editor.model.document;
-    const blocks = Array.from(document.getRoot().getChildren());
-
-    blocks.forEach((block: any) => {
-      if (block.is('element', 'blockquote')) {
-        const nestedBlockquote: any = Array.from(block.getChildren()).find(
-          (child: any) => child.is('element', 'blockquote')
-        );
-
-        if (nestedBlockquote) {
-          writer.remove(nestedBlockquote);
-        }
-      }
-    });
-  }
-
-  private insertCustomQuoteLines(writer: any, editor: any) {
-    const quote = writer.createElement('customBlockQuote');
-    const paragraph = writer.createElement('paragraph');
-    writer.append(paragraph, quote);
-
-    editor.model.insertContent(quote);
-    writer.setSelection(paragraph, 'in');
-  }
-
-  refresh() {
-    this.isEnabled = true;
-  }
-}
-class QuotesWithIcon extends Plugin {
-  init() {
-    const editor: any = this.editor;
-
-    this.registerSchema();
-    this.addDowncastConversion();
-    this.addUpcastConversion();
-    this.addInsertCustomBlockCommand();
-  }
-
-  private registerSchema() {
-    const editor: any = this.editor;
-
-    editor.model.schema.register('quotesWithIcon', {
-      inheritAllFrom: '$block',
-      allowContentOf: '$root',
-    });
-  }
-
-  private addDowncastConversion() {
-    const editor: any = this.editor;
-
-    editor.conversion.for('downcast').elementToElement({
-      model: 'quotesWithIcon',
-      view: (modelElement: any, { writer }: { writer: any }) => {
-        return writer.createContainerElement('blockquote', {
-          class: 'quotes-with-icon-button',
-        });
-      },
-    });
-  }
-
-  private addUpcastConversion() {
-    const editor: any = this.editor;
-
-    editor.conversion.for('upcast').elementToElement({
-      view: {
-        name: 'blockquote',
-        classes: 'quotes-with-icon-button',
-      },
-      model: 'quotesWithIcon',
-    });
-  }
-
-  private addInsertCustomBlockCommand() {
-    const editor: any = this.editor;
-
-    editor.commands.add(
-      'insertQuotesWithIcon',
-      new InsertQuotesWithIcon(editor)
-    );
-    editor.ui.componentFactory.add('insertQuotesWithIcon', (locale: any) => {
-      const buttonView = new ButtonView(locale);
-      buttonView.set({
-        label: 'Insert Quote with Icon',
-        icon: QuotesWithIconSVG, // Replace with your icon if needed
-        tooltip: true,
-      });
-
-      buttonView.on('execute', () => editor.execute('insertQuotesWithIcon'));
-
-      return buttonView;
-    });
-  }
-}
-
-class InsertQuotesWithIcon extends Command {
-  execute() {
-    const editor = this.editor;
-
-    editor.model.change((writer) => {
-      this.removeNestedBlockquotes(writer);
-      this.insertCustomQuoteLines(writer, editor);
-    });
-  }
-
-  private removeNestedBlockquotes(writer: any) {
-    const document: any = this.editor.model.document;
-    const blocks = Array.from(document.getRoot().getChildren());
-
-    blocks.forEach((block: any) => {
-      if (block.is('element', 'blockquote')) {
-        const nestedBlockquote: any = Array.from(block.getChildren()).find(
-          (child: any) => child.is('element', 'blockquote')
-        );
-
-        if (nestedBlockquote) {
-          writer.remove(nestedBlockquote);
-        }
-      }
-    });
-  }
-
-  private insertCustomQuoteLines(writer: any, editor: any) {
-    const quote = writer.createElement('quotesWithIcon');
-    const paragraph = writer.createElement('paragraph');
-    writer.append(paragraph, quote);
-
-    editor.model.insertContent(quote);
-    writer.setSelection(paragraph, 'in');
-  }
-
-  refresh() {
-    this.isEnabled = true;
-  }
-}
-class BoxQuotesBlue extends Plugin {
-  init() {
-    const editor: any = this.editor;
-
-    this.registerSchema();
-    this.addDowncastConversion();
-    this.addUpcastConversion();
-    this.addInsertCustomBlockCommand();
-  }
-
-  private registerSchema() {
-    const editor: any = this.editor;
-
-    editor.model.schema.register('boxQuotesBlue', {
-      inheritAllFrom: '$block',
-      allowContentOf: '$root',
-    });
-  }
-
-  private addDowncastConversion() {
-    const editor: any = this.editor;
-
-    editor.conversion.for('downcast').elementToElement({
-      model: 'boxQuotesBlue',
-      view: (modelElement: any, { writer }: { writer: any }) => {
-        return writer.createContainerElement('blockquote', {
-          class: 'box-quotes-blue',
-        });
-      },
-    });
-  }
-
-  private addUpcastConversion() {
-    const editor: any = this.editor;
-
-    editor.conversion.for('upcast').elementToElement({
-      view: {
-        name: 'blockquote',
-        classes: 'box-quotes-blue',
-      },
-      model: 'boxQuotesBlue',
-    });
-  }
-
-  private addInsertCustomBlockCommand() {
-    const editor: any = this.editor;
-
-    editor.commands.add('insertBoxQuotesBlue', new InsertBoxQuotesBlue(editor));
-    editor.ui.componentFactory.add('insertBoxQuotesBlue', (locale: any) => {
-      const buttonView = new ButtonView(locale);
-      buttonView.set({
-        label: 'Box Blue',
-        icon: BoxQuotesBlueSVG, // Replace with your icon
-        tooltip: true,
-      });
-
-      buttonView.on('execute', () => editor.execute('insertBoxQuotesBlue'));
-
-      return buttonView;
-    });
-  }
-}
-
-class InsertBoxQuotesBlue extends Command {
-  execute() {
-    const editor = this.editor;
-
-    editor.model.change((writer) => {
-      this.removeNestedBlockquotes(writer);
-      this.insertCustomQuoteLines(writer, editor);
-    });
-  }
-
-  private removeNestedBlockquotes(writer: any) {
-    const document: any = this.editor.model.document;
-    const blocks = Array.from(document.getRoot().getChildren());
-
-    blocks.forEach((block: any) => {
-      if (block.is('element', 'blockquote')) {
-        const nestedBlockquote: any = Array.from(block.getChildren()).find(
-          (child: any) => child.is('element', 'blockquote')
-        );
-
-        if (nestedBlockquote) {
-          writer.remove(nestedBlockquote);
-        }
-      }
-    });
-  }
-
-  private insertCustomQuoteLines(writer: any, editor: any) {
-    const quote = writer.createElement('boxQuotesBlue');
-    const paragraph = writer.createElement('paragraph');
-    writer.append(paragraph, quote);
-
-    editor.model.insertContent(quote);
-    writer.setSelection(paragraph, 'in');
-  }
-
-  refresh() {
-    this.isEnabled = true;
-  }
-}
-
-class BoxQuotesGrey extends Plugin {
-  init() {
-    const editor: any = this.editor;
-
-    this.registerSchema();
-    this.addDowncastConversion();
-    this.addUpcastConversion();
-    this.addInsertCustomBlockCommand();
-  }
-
-  private registerSchema() {
-    const editor: any = this.editor;
-
-    editor.model.schema.register('boxQuotesGrey', {
-      inheritAllFrom: '$block',
-      allowContentOf: '$root',
-    });
-  }
-
-  private addDowncastConversion() {
-    const editor: any = this.editor;
-
-    editor.conversion.for('downcast').elementToElement({
-      model: 'boxQuotesGrey',
-      view: (modelElement: any, { writer }: { writer: any }) => {
-        return writer.createContainerElement('blockquote', {
-          class: 'box-quotes-grey',
-        });
-      },
-    });
-  }
-
-  private addUpcastConversion() {
-    const editor: any = this.editor;
-
-    editor.conversion.for('upcast').elementToElement({
-      view: {
-        name: 'blockquote',
-        classes: 'box-quotes-grey',
-      },
-      model: 'boxQuotesGrey',
-    });
-  }
-
-  private addInsertCustomBlockCommand() {
-    const editor: any = this.editor;
-
-    editor.commands.add('insertBoxQuotesGrey', new InsertBoxQuotesGrey(editor));
-    editor.ui.componentFactory.add('insertBoxQuotesGrey', (locale: any) => {
-      const buttonView = new ButtonView(locale);
-      buttonView.set({
-        label: 'Box Grey',
-        icon: BoxQuotesGreySVG, // Replace with your icon
-        tooltip: true,
-      });
-
-      buttonView.on('execute', () => editor.execute('insertBoxQuotesGrey'));
-
-      return buttonView;
-    });
-  }
-}
-
-class InsertBoxQuotesGrey extends Command {
-  execute() {
-    const editor = this.editor;
-
-    editor.model.change((writer) => {
-      this.removeNestedBlockquotes(writer);
-      this.insertCustomQuoteLines(writer, editor);
-    });
-  }
-
-  private removeNestedBlockquotes(writer: any) {
-    const document: any = this.editor.model.document;
-    const blocks = Array.from(document.getRoot().getChildren());
-
-    blocks.forEach((block: any) => {
-      if (block.is('element', 'blockquote')) {
-        const nestedBlockquote: any = Array.from(block.getChildren()).find(
-          (child: any) => child.is('element', 'blockquote')
-        );
-
-        if (nestedBlockquote) {
-          writer.remove(nestedBlockquote);
-        }
-      }
-    });
-  }
-
-  private insertCustomQuoteLines(writer: any, editor: any) {
-    const quote = writer.createElement('boxQuotesGrey');
-    const paragraph = writer.createElement('paragraph');
-    writer.append(paragraph, quote);
-
-    editor.model.insertContent(quote);
-    writer.setSelection(paragraph, 'in');
-  }
-
-  refresh() {
-    this.isEnabled = true;
-  }
-}
-class BoxQuotesGreen extends Plugin {
   init() {
     const editor: any = this.editor;
     this.registerSchema();
@@ -1324,9 +318,7 @@ class BoxQuotesGreen extends Plugin {
 
   private registerSchema() {
     const editor: any = this.editor;
-
-    // Register a schema for the green box quote
-    editor.model.schema.register('boxQuotesGreen', {
+    editor.model.schema.register(this.blockType, {
       inheritAllFrom: '$block',
       allowContentOf: '$root',
     });
@@ -1336,12 +328,11 @@ class BoxQuotesGreen extends Plugin {
     const editor: any = this.editor;
     const conversion = editor.conversion;
 
-    // Downcast: Convert the model to a green boxquote in the view
     conversion.for('downcast').elementToElement({
-      model: 'boxQuotesGreen',
+      model: this.blockType,
       view: (modelElement: any, { writer }: { writer: any }) => {
         return writer.createContainerElement('blockquote', {
-          class: 'box-quotes-green',
+          class: this.blockClass,
         });
       },
     });
@@ -1351,48 +342,47 @@ class BoxQuotesGreen extends Plugin {
     const editor: any = this.editor;
     const conversion = editor.conversion;
 
-    // Upcast: Convert a view blockquote with the 'box-quotes-green' class into a model element
     conversion.for('upcast').elementToElement({
       view: {
         name: 'blockquote',
-        classes: 'box-quotes-green',
+        classes: this.blockClass,
       },
-      model: 'boxQuotesGreen',
+      model: this.blockType,
     });
   }
 
   private addInsertCustomBlockCommand() {
     const editor: any = this.editor;
-
-    // Add a custom command to insert the green box quote
     editor.commands.add(
-      'insertBoxQuotesGreen',
-      new InsertBoxQuotesGreen(editor)
+      this.commandName,
+      new InsertCustomBlock(editor, this.blockType)
     );
 
-    // Add the button to the UI
-    editor.ui.componentFactory.add('insertBoxQuotesGreen', (locale: any) => {
+    editor.ui.componentFactory.add(this.commandName, (locale: any) => {
       const buttonView = new ButtonView(locale);
-
       buttonView.set({
-        label: 'Box Green',
-        icon: BoxQuotesGreenSVG, // Replace with your custom icon
+        label: this.buttonLabel,
+        icon: this.buttonIcon,
         tooltip: true,
       });
 
-      // Execute the insert command when the button is clicked
-      buttonView.on('execute', () => editor.execute('insertBoxQuotesGreen'));
+      buttonView.on('execute', () => editor.execute(this.commandName));
 
       return buttonView;
     });
   }
 }
 
-class InsertBoxQuotesGreen extends Command {
+class InsertCustomBlock extends Command {
+  blockType: string;
+
+  constructor(editor: any, blockType: string) {
+    super(editor);
+    this.blockType = blockType;
+  }
+
   execute() {
     const editor = this.editor;
-
-    // Change the model: remove nested blockquotes and insert the green boxquote
     editor.model.change((writer) => {
       this.removeNestedBlockquotes(writer);
       this.insertCustomQuoteLines(writer, editor);
@@ -1417,135 +407,69 @@ class InsertBoxQuotesGreen extends Command {
   }
 
   private insertCustomQuoteLines(writer: any, editor: any) {
-    const quote = writer.createElement('boxQuotesGreen');
+    const quote = writer.createElement(this.blockType);
     const paragraph = writer.createElement('paragraph');
-
     writer.append(paragraph, quote);
     editor.model.insertContent(quote);
     writer.setSelection(paragraph, 'in');
   }
 
   refresh() {
-    // Enable the command when needed
     this.isEnabled = true;
   }
 }
-class QuotesFitContent extends Plugin {
-  init() {
-    const editor: any = this.editor;
-    this.registerSchema();
-    this.addDowncastConversion();
-    this.addUpcastConversion();
-    this.addInsertCustomBlockCommand();
-  }
-
-  private registerSchema() {
-    const editor: any = this.editor;
-
-    // Đăng ký schema cho QuotesFitContent
-    editor.model.schema.register('QuotesFitContent', {
-      inheritAllFrom: '$block',
-      allowContentOf: '$root',
-    });
-  }
-
-  private addDowncastConversion() {
-    const editor: any = this.editor;
-    const conversion = editor.conversion;
-
-    // Downcast: Model -> View với class QuotesFitContent
-    conversion.for('downcast').elementToElement({
-      model: 'QuotesFitContent',
-      view: (modelElement: any, { writer }: { writer: any }) => {
-        return writer.createContainerElement('blockquote', {
-          class: 'QuotesFitContent',
-        });
-      },
-    });
-  }
-
-  private addUpcastConversion() {
-    const editor: any = this.editor;
-    const conversion = editor.conversion;
-
-    // Upcast: View -> Model với class QuotesFitContent
-    conversion.for('upcast').elementToElement({
-      view: {
-        name: 'blockquote',
-        classes: 'QuotesFitContent',
-      },
-      model: 'QuotesFitContent',
-    });
-  }
-
-  private addInsertCustomBlockCommand() {
-    const editor: any = this.editor;
-
-    // Thêm command chèn block QuotesFitContent
-    editor.commands.add(
-      'insertQuotesFitContent',
-      new InsertQuotesFitContent(editor)
-    );
-
-    // Thêm nút vào UI
-    editor.ui.componentFactory.add('insertQuotesFitContent', (locale: any) => {
-      const buttonView = new ButtonView(locale);
-
-      buttonView.set({
-        label: 'Box Fit-content',
-        icon: BoxQuotesFitContent, // Thay thế bằng icon bạn muốn
-        tooltip: true,
-      });
-
-      // Khi nhấn nút, thực hiện command
-      buttonView.on('execute', () => editor.execute('insertQuotesFitContent'));
-
-      return buttonView;
-    });
-  }
+// BlockHorizontal,QuotesWithIcon
+class BlockQuoteBorder extends CustomBlockPlugin {
+  blockType = 'BlockQuoteBorder';
+  blockClass = 'quote-lines';
+  commandName = 'insertQuoteLines';
+  buttonLabel = 'Quotes border';
+  buttonIcon = LineParallel;
+}
+class BlockHorizontal extends CustomBlockPlugin {
+  blockType = 'BlockHorizontal';
+  blockClass = 'custom-quote-button';
+  commandName = 'insertCustomBlock';
+  buttonLabel = 'Quotes Horizontal';
+  buttonIcon = LineHorizontal;
+}
+class QuotesWithIcon extends CustomBlockPlugin {
+  blockType = 'QuotesWithIcon';
+  blockClass = 'quotes-with-icon-button';
+  commandName = 'insertQuotesWithIcon';
+  buttonLabel = 'Box Green';
+  buttonIcon = QuotesWithIconSVG;
 }
 
-class InsertQuotesFitContent extends Command {
-  execute() {
-    const editor = this.editor;
+class BoxQuotesGreen extends CustomBlockPlugin {
+  blockType = 'boxQuotesGreen';
+  blockClass = 'box-quotes-green';
+  commandName = 'insertBoxQuotesGreen';
+  buttonLabel = 'Box Green';
+  buttonIcon = BoxQuotesGreenSVG;
+}
 
-    // Thay đổi model: Xóa các blockquotes lồng nhau và chèn block mới
-    editor.model.change((writer) => {
-      this.removeNestedBlockquotes(writer);
-      this.insertCustomQuoteLines(writer, editor);
-    });
-  }
+class QuotesFitContent extends CustomBlockPlugin {
+  blockType = 'QuotesFitContent';
+  blockClass = 'QuotesFitContent';
+  commandName = 'insertQuotesFitContent';
+  buttonLabel = 'Box Fit-content';
+  buttonIcon = BoxQuotesFitContent;
+}
+class BoxQuotesGrey extends CustomBlockPlugin {
+  blockType = 'BoxQuotesGrey';
+  blockClass = 'box-quotes-grey';
+  commandName = 'insertBoxQuotesGrey';
+  buttonLabel = 'Box Grey';
+  buttonIcon = BoxQuotesGreySVG;
+}
 
-  private removeNestedBlockquotes(writer: any) {
-    const document: any = this.editor.model.document;
-    const blocks = Array.from(document.getRoot().getChildren());
-
-    blocks.forEach((block: any) => {
-      if (block.is('element', 'blockquote')) {
-        const nestedBlockquote: any = Array.from(block.getChildren()).find(
-          (child: any) => child.is('element', 'blockquote')
-        );
-
-        if (nestedBlockquote) {
-          writer.remove(nestedBlockquote);
-        }
-      }
-    });
-  }
-
-  private insertCustomQuoteLines(writer: any, editor: any) {
-    const quote = writer.createElement('QuotesFitContent');
-    const paragraph = writer.createElement('paragraph');
-
-    writer.append(paragraph, quote);
-    editor.model.insertContent(quote);
-    writer.setSelection(paragraph, 'in');
-  }
-
-  refresh() {
-    // Bật command khi cần thiết
-    this.isEnabled = true;
-  }
+class BoxQuotesBlue extends CustomBlockPlugin {
+  blockType = 'BoxQuotesBlue';
+  blockClass = 'box-quotes-blue';
+  commandName = 'insertBoxQuotesBlue';
+  buttonLabel = 'Box Blue';
+  buttonIcon = BoxQuotesBlueSVG;
 }
 
 function CustomEditor() {
