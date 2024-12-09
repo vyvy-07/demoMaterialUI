@@ -67,6 +67,10 @@ import { useRef, useState } from 'react';
 import { globalOpenPopUp, useModel } from '@/components/ModelContext';
 import PopUpModel from '@/components/PopUpModel';
 import {
+  BoxQuotesBlueSVG,
+  BoxQuotesFitContent,
+  BoxQuotesGreenSVG,
+  BoxQuotesGreySVG,
   FullScreenIcon,
   GridIcon,
   GridIcon2x8x2,
@@ -1153,8 +1157,8 @@ class BoxQuotesBlue extends Plugin {
     editor.ui.componentFactory.add('insertBoxQuotesBlue', (locale: any) => {
       const buttonView = new ButtonView(locale);
       buttonView.set({
-        label: 'Insert Box Quote (Blue)',
-        // icon: BoxQuotesBlueSVG, // Replace with your icon
+        label: 'Box Blue',
+        icon: BoxQuotesBlueSVG, // Replace with your icon
         tooltip: true,
       });
 
@@ -1257,8 +1261,8 @@ class BoxQuotesGrey extends Plugin {
     editor.ui.componentFactory.add('insertBoxQuotesGrey', (locale: any) => {
       const buttonView = new ButtonView(locale);
       buttonView.set({
-        label: 'Insert Box Quote (Grey)',
-        // icon: 'BoxQuotesGreySVG', // Replace with your icon
+        label: 'Box Grey',
+        icon: BoxQuotesGreySVG, // Replace with your icon
         tooltip: true,
       });
 
@@ -1371,8 +1375,8 @@ class BoxQuotesGreen extends Plugin {
       const buttonView = new ButtonView(locale);
 
       buttonView.set({
-        label: 'Insert Box Quote (Green)',
-        // icon: BoxQuotesGreenSVG, // Replace with your custom icon
+        label: 'Box Green',
+        icon: BoxQuotesGreenSVG, // Replace with your custom icon
         tooltip: true,
       });
 
@@ -1488,8 +1492,8 @@ class QuotesFitContent extends Plugin {
       const buttonView = new ButtonView(locale);
 
       buttonView.set({
-        label: 'Insert QuotesFitContent',
-        // icon: QuotesFitContentSVG, // Thay thế bằng icon bạn muốn
+        label: 'Box Fit-content',
+        icon: BoxQuotesFitContent, // Thay thế bằng icon bạn muốn
         tooltip: true,
       });
 
