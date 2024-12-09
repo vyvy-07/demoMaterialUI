@@ -16,6 +16,14 @@ h3 {
 h4 {
   @apply font-semibold text-[16px];
 }
+.ckeditor {
+  width: 700px;
+  padding-right: 0;
+}
+.ckeditor.active {
+  width: 100%;
+  padding-right: 120px;
+}
 .ck-content .grid6x6 {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -58,7 +66,15 @@ h4 {
   padding: 10px; /* Thêm khoảng cách bên trong */
   background-color: #f9f9f9; /* Màu nền cho vùng nhập liệu */
 }
-
+.QuotesFitContent,
+.box-quotes-blue,
+.box-quotes-green,
+.box-quotes-grey {
+  @apply py-5;
+  position: relative;
+  border-left: none !important;
+  font-style: initial !important;
+}
 .custom-quote-button,
 .quotes-with-icon-button,
 .quote-lines {
@@ -125,4 +141,18 @@ h4 {
 }
 .quotes-with-icon-button p {
   width: 100%;
+}
+.box-quotes-blue {
+  @apply bg-blue-200;
+}
+.box-quotes-green {
+  @apply bg-green-200;
+}
+.box-quotes-grey {
+  @apply bg-slate-300;
+}
+.QuotesFitContent p {
+  width: fit-content;
+  padding: 5px 10px;
+  @apply bg-slate-300;
 }

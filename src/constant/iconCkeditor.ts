@@ -191,3 +191,28 @@ export const QuotesWithIconSVG = `<svg width="20px" height="20px" xmlns="http://
   <text x="6" y="12" font-size="6px" font-family="Arial" font-weight="bold">ABC</text>
 </svg>
 `;
+export const BoxQuotesGreySVG = `<svg width="40" height="15" xmlns="http://www.w3.org/2000/svg">
+  <!-- Hình vuông -->
+  <rect x="0" y="0" width="40" height="40" fill="#eeeeee" stroke-width="1"/>
+  <!-- Số "1" -->
+  <text x="50%" y="50%" font-size="12" font-family="Arial" fill="#000" dominant-baseline="middle" text-anchor="middle">3</text>
+</svg>
+`;
+export const BoxQuotesBlueSVG = `<svg width="20" height="15" xmlns="http://www.w3.org/2000/svg">
+  <!-- Hình vuông -->
+  <rect x="0" y="0" width="20" height="40" fill="#add8e6"  stroke-width="1"/>
+  <!-- Số "1" -->
+  <text x="50%" y="50%" font-size="10" font-family="Arial" fill="#000" dominant-baseline="middle" text-anchor="middle">2</text>
+</svg>`;
+export const BoxQuotesGreenSVG = `<svg width="20" height="15" xmlns="http://www.w3.org/2000/svg">
+  <!-- Hình vuông -->
+  <rect x="0" y="0" width="20" height="20" fill="#33FF99"  stroke-width="1"/>
+  <!-- Số "1" -->
+  <text x="50%" y="50%" font-size="10" font-family="Arial" fill="#000" dominant-baseline="middle" text-anchor="middle">1</text>
+</svg>`;
+export const BoxQuotesFitContent = `<svg width="20" height="15" xmlns="http://www.w3.org/2000/svg">
+  <!-- Hình vuông -->
+  <rect x="0" y="0" width="20" height="20" fill="#FFFF33"  stroke-width="1"/>
+  <!-- Số "1" -->
+  <text x="50%" y="50%" font-size="10" font-family="Arial" fill="#000" dominant-baseline="middle" text-anchor="middle">Fit</text>
+</svg>`;
