@@ -37,7 +37,6 @@ import {
   List,
   MediaEmbed,
   Mention,
-  // Model,
   PageBreak,
   Paragraph,
   PictureEditing,
@@ -53,8 +52,6 @@ import {
   TableColumnResize,
   TableToolbar,
   TodoList,
-  toWidget,
-  toWidgetEditable,
   Underline,
   Widget,
   WordCount,
@@ -84,7 +81,6 @@ import {
   IconUploadMedia,
   LineHorizontal,
   LineParallel,
-  Quotes,
   QuotesWithIconSVG,
 } from '@/constant/iconCkeditor';
 import './style.css';
@@ -119,10 +115,6 @@ class UploadMedia extends Plugin {
 
   init() {
     const editor = this.editor;
-    // editor.model.schema.register('caption', {
-    //   allowIn: 'imageBlock',
-    //   allowContentOf: '$block',
-    // });
 
     editor.ui.componentFactory.add('uploadMedia', () => {
       const button = new ButtonView();
@@ -418,7 +410,6 @@ class InsertCustomBlock extends Command {
     this.isEnabled = true;
   }
 }
-// BlockHorizontal,QuotesWithIcon
 class BlockQuoteBorder extends CustomBlockPlugin {
   blockType = 'BlockQuoteBorder';
   blockClass = 'quote-lines';
